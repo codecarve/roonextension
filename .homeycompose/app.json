@@ -1,6 +1,6 @@
 {
   "id": "nl.codecarve.homeyroon",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -47,5 +47,15 @@
       },
       "class": "speaker"
     }
-  ]
+  ],
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "codecarve"
+      },
+      "githubSponsors": {
+        "username": "codecarve"
+      }
+    }
+  }
 }
