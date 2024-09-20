@@ -1,6 +1,6 @@
 {
   "id": "nl.codecarve.homeyroon",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -25,6 +25,13 @@
     "name": "CodeCarve",
     "email": "help@codecarve.nl"
   },
+  "contributors": {
+    "developers": [
+      {
+        "name": "Merijn van Mourik"
+      }
+    ]
+  },
   "brandColor": "#6D6CD4",
   "drivers": [
     {
@@ -48,6 +55,11 @@
       "class": "speaker"
     }
   ],
+  "source": "https://github.com/codecarve/homeyroon",
+  "bugs": {
+    "url": "https://github.com/codecarve/homeyroon/issues"
+  },
+  "support": "mailto:help@codecarve.nl",
   "contributing": {
     "donate": {
       "paypal": {
