@@ -17,7 +17,7 @@ class RoonCoreDriver extends Homey.Driver {
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.homeyroon",
       display_name: "Homey",
-      display_version: "0.3.0",
+      display_version: "1.0.3",
       publisher: "CodeCarve",
       email: "help@codecarve.nl",
       website: "https://codecarve.nl",
