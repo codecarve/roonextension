@@ -1,0 +1,16 @@
+{
+  "name": "nl.codecarve.homeyroon",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {},
+  "dependencies": {
+    "node-roon-api": "github:roonlabs/node-roon-api",
+    "node-roon-api-image": "github:roonlabs/node-roon-api-image",
+    "node-roon-api-status": "github:roonlabs/node-roon-api-status",
+    "node-roon-api-transport": "github:roonlabs/node-roon-api-transport",
+    "prettier": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.7"
+  }
+}

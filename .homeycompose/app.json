@@ -1,0 +1,51 @@
+{
+  "id": "nl.codecarve.homeyroon",
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Roon"
+  },
+  "description": {
+    "en": "Adds support for Roon"
+  },
+  "category": [
+    "music"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.jpg",
+    "large": "/assets/images/large.jpg",
+    "xlarge": "/assets/images/xlarge.jpg"
+  },
+  "author": {
+    "name": "CodeCarve",
+    "email": "help@codecarve.nl"
+  },
+  "brandColor": "#6D6CD4",
+  "drivers": [
+    {
+      "id": "roon-core",
+      "name": {
+        "en": "Roon Core Device"
+      }
+    },
+    {
+      "id": "roon-zone",
+      "name": {
+        "en": "Roon Zone Device"
+      },
+      "class": "speaker"
+    },
+    {
+      "id": "roon-output",
+      "name": {
+        "en": "Roon Output Device"
+      },
+      "class": "speaker"
+    }
+  ]
+}

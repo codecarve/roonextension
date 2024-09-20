@@ -1,0 +1,49 @@
+{
+  "name": {
+    "en": "Output"
+  },
+  "class": "speaker",
+  "capabilities": [
+    "speaker_playing",
+    "speaker_shuffle",
+    "speaker_repeat",
+    "speaker_next",
+    "speaker_prev",
+    "speaker_track",
+    "speaker_artist",
+    "speaker_album",
+    "speaker_duration",
+    "speaker_position",
+    "speaker_queue_items_remaining",
+    "speaker_queue_time_remaining",
+    "volume_up",
+    "volume_down",
+    "volume_mute",
+    "volume_set",
+    "volume_soft_limit"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "list_roon_outputs",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_roon_outputs"
+      }
+    },
+    {
+      "id": "add_roon_outputs",
+      "template": "add_devices"
+    }
+  ]
+}
