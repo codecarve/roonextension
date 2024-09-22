@@ -16,44 +16,59 @@ class RoonZoneDevice extends Homey.Device {
     this.albumArtImage.setPath(this.imagePath);
     await this.setAlbumArtImage(this.albumArtImage);
 
-    zoneManager.on("zonesUpdated", this.onZonesUpdated);
-    zoneManager.on("zonesChanged", this.onZonesChanged);
-    zoneManager.on("zonesRemoved", this.onZonesRemoved);
-    zoneManager.on("zonesSeekChanged", this.onZonesSeekChanged);
+    this._boundOnZonesUpdated = this.onZonesUpdated.bind(this);
+    zoneManager.on("zonesUpdated", this._boundOnZonesUpdated);
+    this._boundOnZonesChanged = this.onZonesChanged.bind(this);
+    zoneManager.on("zonesChanged", this._boundOnZonesChanged);
+    this._boundOnZonesRemoved = this.onZonesRemoved.bind(this);
+    zoneManager.on("zonesRemoved", this._boundOnZonesRemoved);
+    this._boundOnZonesSeekChanged = this.onZonesSeekChanged.bind(this);
+    zoneManager.on("zonesSeekChanged", this._boundOnZonesSeekChanged);
 
     this.registerCapabilityListener(
       "speaker_playing",
-      this.onCapabilitySpeakerPlaying,
+      this.onCapabilitySpeakerPlaying.bind(this),
     );
 
     this.registerCapabilityListener(
       "speaker_shuffle",
-      this.onCapabilitySpeakerShuffle,
+      this.onCapabilitySpeakerShuffle.bind(this),
     );
 
     this.registerCapabilityListener(
       "speaker_repeat",
-      this.onCapabilitySpeakerRepeat,
+      this.onCapabilitySpeakerRepeat.bind(this),
     );
 
     this.registerCapabilityListener(
       "speaker_next",
-      this.onCapabilitySpeakerNext,
+      this.onCapabilitySpeakerNext.bind(this),
     );
 
     this.registerCapabilityListener(
       "speaker_prev",
-      this.onCapabilitySpeakerPrevious,
+      this.onCapabilitySpeakerPrevious.bind(this),
     );
 
     this.registerCapabilityListener(
       "speaker_position",
-      this.onCapabilitySpeakerPosition,
+      this.onCapabilitySpeakerPosition.bind(this),
     );
 
-    this.registerCapabilityListener("volume_up", this.onCapabilityVolumeUp);
-    this.registerCapabilityListener("volume_down", this.onCapabilityVolumeDown);
-    this.registerCapabilityListener("volume_mute", this.onCapabilityVolumeMute);
+    this.registerCapabilityListener(
+      "volume_up",
+      this.onCapabilityVolumeUp.bind(this),
+    );
+
+    this.registerCapabilityListener(
+      "volume_down",
+      this.onCapabilityVolumeDown.bind(this),
+    );
+
+    this.registerCapabilityListener(
+      "volume_mute",
+      this.onCapabilityVolumeMute.bind(this),
+    );
 
     this.log("RoonZoneDevice has been initialized");
   }
@@ -71,117 +86,115 @@ class RoonZoneDevice extends Homey.Device {
   }
 
   async onDeleted() {
-    zoneManager.off("zonesUpdated", this.onZonesUpdated);
-    zoneManager.off("zonesChanged", this.onZonesChanged);
-    zoneManager.off("zonesRemoved", this.onZonesRemoved);
-    zoneManager.off("zonesSeekChanged", this.onZonesSeekChanged);
+    zoneManager.off("zonesUpdated", this._boundOnZonesUpdated);
+    zoneManager.off("zonesChanged", this._boundOnZonesChanged);
+    zoneManager.off("zonesRemoved", this._boundOnZonesRemoved);
+    zoneManager.off("zonesSeekChanged", this._boundOnZonesSeekChanged);
     this.log("RoonZoneDevice has been deleted");
   }
 
-  onZonesUpdated = async (zones) => {
-    this.log("onZonesUpdated");
-
+  updateZones = async (zones, disableNonExistingZones) => {
     let found = false;
+
     for (let zone of zones) {
       if (zone.zone_id === this.getData().id) {
         found = true;
 
         this.zone = Object.assign({}, zone);
 
-        await this.setCapabilityValue(
-          "speaker_playing",
-          zone.state === "playing",
-        ).catch(this.error);
+        if (zone.state) {
+          let isPlaying = zone.state === "playing";
+          this.log("zone state", zone.state, isPlaying);
 
-        await this.setCapabilityValue(
-          "speaker_shuffle",
-          zone.settings.shuffle,
-        ).catch(this.error);
-
-        await this.setCapabilityValue(
-          "speaker_shuffle",
-          zone.settings.shuffle,
-        ).catch(this.error);
-
-        try {
-          let repeatValue;
-          switch (zone.settings.loop) {
-            case "disabled":
-              repeatValue = "none";
-              break;
-
-            case "loop":
-              repeatValue = "playlist";
-              break;
-
-            case "loop_one":
-              repeatValue = "track";
-              break;
-          }
-
-          if (repeatValue !== undefined) {
-            await this.setCapabilityValue("speaker_repeat", repeatValue);
-          }
-        } catch (error) {
-          this.error("Error setting repeat value", error);
+          await this.setCapabilityValue("speaker_playing", isPlaying).catch(
+            this.error,
+          );
         }
 
-        await this.setCapabilityValue(
-          "speaker_position",
-          zone.now_playing.seek_position,
-        ).catch(this.error);
+        if (zone.settings) {
+          await this.setCapabilityValue(
+            "speaker_shuffle",
+            zone.settings.shuffle,
+          ).catch(this.error);
 
-        await this.setCapabilityValue(
-          "speaker_track",
-          zone.now_playing.three_line.line1,
-        ).catch(this.error);
+          try {
+            const loopMap = {
+              disabled: "none",
+              loop: "playlist",
+              loop_one: "track",
+            };
 
-        await this.setCapabilityValue(
-          "speaker_artist",
-          zone.now_playing.three_line.line2,
-        ).catch(this.error);
+            const repeatValue = loopMap[zone.settings.loop];
 
-        await this.setCapabilityValue(
-          "speaker_album",
-          zone.now_playing.three_line.line3,
-        ).catch(this.error);
-
-        await this.setCapabilityValue(
-          "speaker_duration",
-          zone.now_playing.length,
-        ).catch(this.error);
-
-        await this.setCapabilityValue(
-          "speaker_position",
-          zone.now_playing.seek_position,
-        ).catch(this.error);
-
-        await this.setCapabilityValue(
-          "speaker_queue_items_remaining",
-          zone.queue_items_remaining,
-        ).catch(this.error);
-
-        await this.setCapabilityValue(
-          "speaker_queue_time_remaining",
-          zone.queue_time_remaining,
-        ).catch(this.error);
-
-        try {
-          for (let output of zone.outputs) {
-            let is_muted = false;
-            if (output.volume.is_muted) {
-              is_muted = true;
+            if (repeatValue) {
+              await this.setCapabilityValue("speaker_repeat", repeatValue);
             }
-            await this.setCapabilityValue("volume_mute", is_muted).catch(
-              this.error,
-            );
+          } catch (error) {
+            this.error("Error setting repeat value", error);
           }
-        } catch (error) {
-          this.error("Error setting volume_mute", error);
+        }
+
+        if (zone.now_playing?.seek_position) {
+          await this.setCapabilityValue(
+            "speaker_position",
+            +zone.now_playing.seek_position,
+          ).catch(this.error);
+        }
+
+        if (zone.now_playing?.three_line) {
+          await this.setCapabilityValue(
+            "speaker_track",
+            zone.now_playing.three_line.line1,
+          ).catch(this.error);
+
+          await this.setCapabilityValue(
+            "speaker_artist",
+            zone.now_playing.three_line.line2,
+          ).catch(this.error);
+
+          await this.setCapabilityValue(
+            "speaker_album",
+            zone.now_playing.three_line.line3,
+          ).catch(this.error);
+        }
+
+        if (zone.now_playing?.length) {
+          await this.setCapabilityValue(
+            "speaker_duration",
+            zone.now_playing.length,
+          ).catch(this.error);
+        }
+
+        if (zone.queue_items_remaining) {
+          await this.setCapabilityValue(
+            "speaker_queue_items_remaining",
+            +zone.queue_items_remaining,
+          ).catch(this.error);
+        }
+
+        if (zone.queue_time_remaining) {
+          await this.setCapabilityValue(
+            "speaker_queue_time_remaining",
+            +zone.queue_time_remaining,
+          ).catch(this.error);
+        }
+
+        for (let output of zone.outputs) {
+          if (output.volume) {
+            try {
+              let is_muted = output.volume.is_muted;
+              await this.setCapabilityValue("volume_mute", is_muted);
+            } catch (error) {
+              this.error(
+                `Error setting volume_mute for output ${output.output_id}`,
+                error,
+              );
+            }
+          }
         }
 
         try {
-          if (zone && zone.now_playing && zone.now_playing.image_key) {
+          if (zone && zone.now_playing) {
             const newImage = zone.now_playing.image_key;
             if (newImage !== this.currentImage) {
               const buffer = await new Promise((resolve, reject) => {
@@ -205,20 +218,41 @@ class RoonZoneDevice extends Homey.Device {
           this.error("Error setting image", error);
         }
 
+        // repeat this because Homey doesn't always seem to update the state of the zone
+        if (zone.state) {
+          let isPlaying = zone.state === "playing";
+          this.log("zone state", zone.state, isPlaying);
+
+          await this.setCapabilityValue("speaker_playing", isPlaying).catch(
+            this.error,
+          );
+        }
+
         break;
       }
     }
-    // if (!found) {
-    //   await this.setUnavailable("Roon zone unavailable");
-    // }
+    if (!found && disableNonExistingZones) {
+      // at startup, a full zone update will be sent and if we don't find the zone, we need to set it unavailable
+      // await this.setUnavailable("This zone was not found in Roon");
+      // zoneManager.off("zonesUpdated", this._boundOnZonesUpdated);
+      // zoneManager.off("zonesChanged", this._boundOnZonesChanged);
+      // zoneManager.off("zonesRemoved", this._boundOnZonesRemoved);
+      // zoneManager.off("zonesSeekChanged", this._boundOnZonesSeekChanged);
+    }
+  };
+
+  onZonesUpdated = async (zones) => {
+    this.log("onZonesUpdated");
+
+    await this.updateZones(zones, true);
   };
 
   onZonesChanged = async (zones) => {
-    return this.onZonesUpdated(zones);
+    await this.updateZones(zones, false);
   };
 
-  onZonesRemoved = async (data) => {
-    for (let zoneId of data) {
+  onZonesRemoved = async (zones) => {
+    for (let zoneId of zones) {
       if (zoneId === this.getData().id) {
         this.log("Zone removed -", zoneId);
         await this.setUnavailable("The zone is removed from Roon");
@@ -227,8 +261,8 @@ class RoonZoneDevice extends Homey.Device {
   };
 
   onZonesSeekChanged = async (zones_seek_changed) => {
-    if (this.zone === null) {
-      return Promise.resolve();
+    if (!this.zone) {
+      return;
     }
     for (let zone of zones_seek_changed) {
       if (zone.zone_id === this.getData().id) {
@@ -250,205 +284,117 @@ class RoonZoneDevice extends Homey.Device {
 
   onCapabilitySpeakerPlaying = async (value, opts) => {
     this.log("onCapabilitySpeakerPlaying", value, opts);
-    // value is true or false
+
+    if (!this.zone) {
+      return;
+    }
+
     const action = value ? "play" : "pause";
-    return new Promise((res, rej) => {
-      zoneManager.transport.control(this.getData().id, action, (err) => {
-        if (err) {
-          return Promise.reject(
-            new Error(
-              "Setting speaker playing to " + action + " failed!" + err,
-            ),
-          );
-        }
-        res();
-      });
-    });
+    try {
+      await zoneManager.transport.control(this.getData().id, action);
+    } catch (err) {
+      throw new Error(`Setting speaker playing to ${action} failed! ${err}`);
+    }
   };
 
   onCapabilitySpeakerShuffle = async (value, opts) => {
     this.log("onCapabilitySpeakerShuffle", value, opts);
 
-    return new Promise((res, rej) => {
-      zoneManager.transport.change_settings(
-        this.getData().id,
-        { shuffle: value },
-        (err) => {
-          if (err) {
-            return Promise.reject(
-              new Error("Setting shuffle to " + value + " failed!" + err),
-            );
-          }
-          res();
-        },
-      );
-    });
+    try {
+      await zoneManager.transport.change_settings(this.getData().id, {
+        shuffle: value,
+      });
+    } catch (err) {
+      throw new Error(`Setting shuffle to ${value} failed! ${err}`);
+    }
   };
 
   onCapabilitySpeakerRepeat = async (value, opts) => {
     this.log("onCapabilitySpeakerRepeat", value, opts);
 
-    let loop = "disabled";
+    const loopMap = {
+      none: "disabled",
+      playlist: "loop",
+      track: "loop_one",
+    };
 
-    switch (value) {
-      case "none":
-        loop = "disabled";
-        break;
-      case "playlist":
-        loop = "loop";
-        break;
-      case "track":
-        loop = "loop_one";
-        break;
+    const loop = loopMap[value] || "disabled";
+
+    try {
+      await zoneManager.transport.change_settings(this.getData().id, { loop });
+    } catch (err) {
+      throw new Error(`Setting loop to ${value} failed! ${err}`);
     }
-
-    return new Promise((res, rej) => {
-      zoneManager.transport.change_settings(
-        this.getData().id,
-        { loop },
-        (err) => {
-          if (err) {
-            return Promise.reject(
-              new Error("Setting loop to " + value + " failed!" + err),
-            );
-          }
-          res();
-        },
-      );
-    });
   };
 
   onCapabilitySpeakerNext = async (value, opts) => {
     this.log("onCapabilitySpeakerNext", value, opts);
 
-    return new Promise((res, rej) => {
-      zoneManager.transport.control(this.getData().id, "next", (err) => {
-        if (err) {
-          return Promise.reject(
-            new Error("Setting speaker playing to next failed!" + err),
-          );
-        }
-        res();
-      });
-      res();
-    });
+    try {
+      await zoneManager.transport.control(this.getData().id, "next");
+    } catch (err) {
+      throw new Error(`Setting speaker playing to next failed! ${err}`);
+    }
   };
 
   onCapabilitySpeakerPrevious = async (value, opts) => {
     this.log("onCapabilitySpeakerPrevious", value, opts);
 
-    return new Promise((res, rej) => {
-      zoneManager.transport.control(this.getData().id, "previous", (err) => {
-        if (err) {
-          return Promise.reject(
-            new Error("Setting speaker playing to previous failed!" + err),
-          );
-        }
-        res();
-      });
-      res();
-    });
+    try {
+      await zoneManager.transport.control(this.getData().id, "previous");
+    } catch (err) {
+      throw new Error(`Setting speaker playing to previous failed! ${err}`);
+    }
   };
 
   onCapabilitySpeakerPosition = async (value, opts) => {
     this.log("onCapabilitySpeakerPosition", value, opts);
 
-    return new Promise((res, rej) => {
-      zoneManager.transport.seek(
-        this.getData().id,
-        "absolute",
-        value,
-        (err) => {
-          if (err) {
-            return Promise.reject(
-              new Error("Setting speaker position " + value + " failed!" + err),
-            );
-          }
-          res();
-        },
+    try {
+      await zoneManager.transport.seek(this.getData().id, "absolute", value);
+    } catch (err) {
+      throw new Error(`Setting speaker position ${value} failed! ${err}`);
+    }
+  };
+
+  changeVolume = async (direction) => {
+    const volumeChangePromises = this.zone.outputs
+      .filter((output) =>
+        direction > 0
+          ? +output.volume.value < +output.volume.soft_limit
+          : +output.volume.value > 0,
+      )
+      .map((output) =>
+        zoneManager.transport.change_volume(
+          output.output_id,
+          "relative",
+          direction,
+        ),
       );
-      res();
-    });
+
+    try {
+      await Promise.all(volumeChangePromises);
+    } catch (error) {
+      this.error(error);
+    }
   };
 
   onCapabilityVolumeUp = async (value, opts) => {
     this.log("onCapabilityVolumeUp", value, opts);
-
-    const volumeChangePromises = this.zone.outputs
-      .filter((output) => +output.volume.value < +output.volume.soft_limit)
-      .map((output) => {
-        return new Promise((res, rej) => {
-          zoneManager.transport.change_volume(
-            output.output_id,
-            "relative",
-            1,
-            (err) => {
-              if (err) {
-                rej(new Error("Setting volume up failed! " + err));
-              } else {
-                res();
-              }
-            },
-          );
-        });
-      });
-
-    try {
-      await Promise.all(volumeChangePromises);
-    } catch (error) {
-      this.error(error);
-    }
+    await this.changeVolume(1);
   };
 
   onCapabilityVolumeDown = async (value, opts) => {
     this.log("onCapabilityVolumeDown", value, opts);
-
-    const volumeChangePromises = this.zone.outputs
-      .filter((output) => +output.volume.value < +output.volume.soft_limit)
-      .map((output) => {
-        return new Promise((resolve, reject) => {
-          zoneManager.transport.change_volume(
-            output.output_id,
-            "relative",
-            -1,
-            (err) => {
-              if (err) {
-                reject(new Error("Setting volume down failed! " + err));
-              } else {
-                resolve();
-              }
-            },
-          );
-        });
-      });
-
-    try {
-      await Promise.all(volumeChangePromises);
-    } catch (error) {
-      this.error(error);
-    }
+    await this.changeVolume(-1);
   };
 
   onCapabilityVolumeMute = async (value, opts) => {
     this.log("onCapabilityVolumeMute", value, opts);
 
-    const volumeMutePromises = this.zone.outputs.map((output) => {
-      return new Promise((resolve, reject) => {
-        zoneManager.transport.mute(
-          output.output_id,
-          value ? "mute" : "unmute",
-          (err) => {
-            if (err) {
-              reject(
-                new Error(`${value ? "Unmuting" : "Muting"} failed! ` + err),
-              );
-            } else {
-              resolve();
-            }
-          },
-        );
-      });
-    });
+    const volumeMutePromises = this.zone.outputs.map((output) =>
+      zoneManager.transport.mute(output.output_id, value ? "mute" : "unmute"),
+    );
 
     try {
       await Promise.all(volumeMutePromises);
