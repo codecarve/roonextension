@@ -8,13 +8,13 @@ const { writeFile } = require("../../lib/image-util");
 class RoonOutputDevice extends Homey.Device {
   async onInit() {
     this.zone = null;
+
     this.currentImage = "";
     this.imagePath = `/userdata/${this.getData().id}.jpeg`;
 
     this.albumArtImage = await this.homey.images.createImage();
     this.albumArtImage.setPath(this.imagePath);
     await this.setAlbumArtImage(this.albumArtImage);
-    this;
 
     zoneManager.on("zonesUpdated", this.onZonesUpdated);
     zoneManager.on("zonesChanged", this.onZonesChanged);
@@ -80,7 +80,6 @@ class RoonOutputDevice extends Homey.Device {
 
   onZonesUpdated = async (zones) => {
     this.log("onZonesUpdated");
-    //this.log("onZonesUpdated", JSON.stringify(zones, null, 2));
 
     let found = false;
     for (let zone of zones) {
@@ -105,23 +104,27 @@ class RoonOutputDevice extends Homey.Device {
             zone.settings.shuffle,
           ).catch(this.error);
 
-          let repeatValue;
-          switch (zone.settings.loop) {
-            case "disabled":
-              repeatValue = "none";
-              break;
+          try {
+            let repeatValue;
+            switch (zone.settings.loop) {
+              case "disabled":
+                repeatValue = "none";
+                break;
 
-            case "loop":
-              repeatValue = "playlist";
-              break;
+              case "loop":
+                repeatValue = "playlist";
+                break;
 
-            case "loop_one":
-              repeatValue = "track";
-              break;
-          }
+              case "loop_one":
+                repeatValue = "track";
+                break;
+            }
 
-          if (repeatValue !== undefined) {
-            await this.setCapabilityValue("speaker_repeat", repeatValue);
+            if (repeatValue !== undefined) {
+              await this.setCapabilityValue("speaker_repeat", repeatValue);
+            }
+          } catch (error) {
+            this.error("Error setting repeat value", error);
           }
 
           await this.setCapabilityValue(
@@ -179,30 +182,34 @@ class RoonOutputDevice extends Homey.Device {
             +output.volume.soft_limit,
           );
 
-          const newImage = zone.now_playing.image_key;
-          if (newImage !== this.currentImage) {
-            const buffer = await new Promise((resolve, reject) => {
-              zoneManager.imageDriver.get_image(
-                zone.now_playing.image_key,
-                {
-                  format: "image/jpeg",
-                },
-                (err, contentType, buffer) => {
-                  if (err) throw reject(err);
-                  resolve(buffer);
-                },
-              );
-            });
-            await writeFile(this.imagePath, buffer, "binary");
-            await this.albumArtImage.update();
-            this.currentImage = newImage;
+          try {
+            const newImage = zone.now_playing.image_key;
+            if (newImage !== this.currentImage) {
+              const buffer = await new Promise((resolve, reject) => {
+                zoneManager.imageDriver.get_image(
+                  zone.now_playing.image_key,
+                  {
+                    format: "image/jpeg",
+                  },
+                  (err, contentType, buffer) => {
+                    if (err) throw reject(err);
+                    resolve(buffer);
+                  },
+                );
+              });
+              await writeFile(this.imagePath, buffer, "binary");
+              await this.albumArtImage.update();
+              this.currentImage = newImage;
+            }
+          } catch (error) {
+            this.error("Error setting image", error);
           }
 
           break;
         }
       }
     }
-    // doesn't work because the zones are not always there
+    // doesn't work because zones can change
     // if (!found) {
     //   await this.setUnavailable("Roon output unavailable");
     // }

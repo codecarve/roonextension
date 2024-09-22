@@ -18,7 +18,7 @@ class RoonZoneDevice extends Homey.Device {
 
     zoneManager.on("zonesUpdated", this.onZonesUpdated);
     zoneManager.on("zonesChanged", this.onZonesChanged);
-    zoneManager.on("zoneRemoved", this.onZoneRemoved);
+    zoneManager.on("zonesRemoved", this.onZonesRemoved);
     zoneManager.on("zonesSeekChanged", this.onZonesSeekChanged);
 
     this.registerCapabilityListener(
@@ -52,9 +52,7 @@ class RoonZoneDevice extends Homey.Device {
     );
 
     this.registerCapabilityListener("volume_up", this.onCapabilityVolumeUp);
-
     this.registerCapabilityListener("volume_down", this.onCapabilityVolumeDown);
-
     this.registerCapabilityListener("volume_mute", this.onCapabilityVolumeMute);
 
     this.log("RoonZoneDevice has been initialized");
@@ -75,7 +73,7 @@ class RoonZoneDevice extends Homey.Device {
   async onDeleted() {
     zoneManager.off("zonesUpdated", this.onZonesUpdated);
     zoneManager.off("zonesChanged", this.onZonesChanged);
-    zoneManager.off("zoneRemoved", this.onZoneRemoved);
+    zoneManager.off("zonesRemoved", this.onZonesRemoved);
     zoneManager.off("zonesSeekChanged", this.onZonesSeekChanged);
     this.log("RoonZoneDevice has been deleted");
   }
@@ -87,6 +85,7 @@ class RoonZoneDevice extends Homey.Device {
     for (let zone of zones) {
       if (zone.zone_id === this.getData().id) {
         found = true;
+
         this.zone = Object.assign({}, zone);
 
         await this.setCapabilityValue(
@@ -104,23 +103,27 @@ class RoonZoneDevice extends Homey.Device {
           zone.settings.shuffle,
         ).catch(this.error);
 
-        let repeatValue;
-        switch (zone.settings.loop) {
-          case "disabled":
-            repeatValue = "none";
-            break;
+        try {
+          let repeatValue;
+          switch (zone.settings.loop) {
+            case "disabled":
+              repeatValue = "none";
+              break;
 
-          case "loop":
-            repeatValue = "playlist";
-            break;
+            case "loop":
+              repeatValue = "playlist";
+              break;
 
-          case "loop_one":
-            repeatValue = "track";
-            break;
-        }
+            case "loop_one":
+              repeatValue = "track";
+              break;
+          }
 
-        if (repeatValue !== undefined) {
-          await this.setCapabilityValue("speaker_repeat", repeatValue);
+          if (repeatValue !== undefined) {
+            await this.setCapabilityValue("speaker_repeat", repeatValue);
+          }
+        } catch (error) {
+          this.error("Error setting repeat value", error);
         }
 
         await this.setCapabilityValue(
@@ -163,33 +166,43 @@ class RoonZoneDevice extends Homey.Device {
           zone.queue_time_remaining,
         ).catch(this.error);
 
-        for (let output of zone.outputs) {
-          let is_muted = false;
-          if (output.volume.is_muted) {
-            is_muted = true;
+        try {
+          for (let output of zone.outputs) {
+            let is_muted = false;
+            if (output.volume.is_muted) {
+              is_muted = true;
+            }
+            await this.setCapabilityValue("volume_mute", is_muted).catch(
+              this.error,
+            );
           }
-          await this.setCapabilityValue("volume_mute", is_muted).catch(
-            this.error,
-          );
+        } catch (error) {
+          this.error("Error setting volume_mute", error);
         }
 
-        const newImage = zone.now_playing.image_key;
-        if (newImage !== this.currentImage) {
-          const buffer = await new Promise((resolve, reject) => {
-            zoneManager.imageDriver.get_image(
-              zone.now_playing.image_key,
-              {
-                format: "image/jpeg",
-              },
-              (err, contentType, buffer) => {
-                if (err) throw reject(err);
-                resolve(buffer);
-              },
-            );
-          });
-          await writeFile(this.imagePath, buffer, "binary");
-          await this.albumArtImage.update();
-          this.currentImage = newImage;
+        try {
+          if (zone && zone.now_playing && zone.now_playing.image_key) {
+            const newImage = zone.now_playing.image_key;
+            if (newImage !== this.currentImage) {
+              const buffer = await new Promise((resolve, reject) => {
+                zoneManager.imageDriver.get_image(
+                  zone.now_playing.image_key,
+                  {
+                    format: "image/jpeg",
+                  },
+                  (err, contentType, buffer) => {
+                    if (err) throw reject(err);
+                    resolve(buffer);
+                  },
+                );
+              });
+              await writeFile(this.imagePath, buffer, "binary");
+              await this.albumArtImage.update();
+              this.currentImage = newImage;
+            }
+          }
+        } catch (error) {
+          this.error("Error setting image", error);
         }
 
         break;
@@ -204,14 +217,19 @@ class RoonZoneDevice extends Homey.Device {
     return this.onZonesUpdated(zones);
   };
 
-  onZoneRemoved = async (data) => {
-    if (data === this.getData().id) {
-      this.log("Zone removed -", data);
-      this.setUnavailable("The zone is removed");
+  onZonesRemoved = async (data) => {
+    for (let zoneId of data) {
+      if (zoneId === this.getData().id) {
+        this.log("Zone removed -", zoneId);
+        await this.setUnavailable("The zone is removed from Roon");
+      }
     }
   };
 
   onZonesSeekChanged = async (zones_seek_changed) => {
+    if (this.zone === null) {
+      return Promise.resolve();
+    }
     for (let zone of zones_seek_changed) {
       if (zone.zone_id === this.getData().id) {
         if (zone.seek_position !== undefined) {
