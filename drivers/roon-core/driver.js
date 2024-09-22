@@ -42,12 +42,12 @@ class RoonCoreDriver extends Homey.Driver {
         });
       },
       set_persisted_state: (state) => {
-        this.log("set_persisted_state", JSON.stringify(state, null, 2));
+        //this.log("set_persisted_state", JSON.stringify(state, null, 2));
         this.homey.settings.set("roonstate", state);
       },
       get_persisted_state: () => {
         const state = this.homey.settings.get("roonstate") || {};
-        this.log("get_persisted_state", JSON.stringify(state, null, 2));
+        //this.log("get_persisted_state", JSON.stringify(state, null, 2));
         return state;
       },
     });
@@ -75,16 +75,9 @@ class RoonCoreDriver extends Homey.Driver {
     this.imageDriver = core.services.RoonApiImage;
     zoneManager.updateTransport(this.transport);
     zoneManager.updateImageDriver(this.imageDriver);
-    zoneManager.updateCore(core);
 
     this.transport.subscribe_zones((response, data) => {
-      // this.log(
-      //   `handleCorePaired - ${response} - `,
-      //   JSON.stringify(data, null, 2),
-      // );
-
       zoneManager.updateZones(data);
-      zoneManager.updateCore(null);
     });
   }
 }
