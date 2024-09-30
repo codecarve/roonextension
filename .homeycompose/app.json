@@ -1,6 +1,6 @@
 {
   "id": "nl.codecarve.homeyroon",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -10,7 +10,7 @@
     "en": "Roon"
   },
   "description": {
-    "en": "Adds support for Roon"
+    "en": "Rediscover your music across every room"
   },
   "category": [
     "music"
@@ -34,12 +34,6 @@
   },
   "brandColor": "#6D6CD4",
   "drivers": [
-    {
-      "id": "roon-core",
-      "name": {
-        "en": "Roon Core Device"
-      }
-    },
     {
       "id": "roon-zone",
       "name": {

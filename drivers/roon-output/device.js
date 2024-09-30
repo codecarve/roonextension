@@ -107,7 +107,7 @@ class RoonOutputDevice extends Homey.Device {
 
           if (zone.state) {
             let isPlaying = zone.state === "playing";
-            this.log("zone state", zone.state, isPlaying);
+            this.log(`zone state: ${zone.state} playing: ${isPlaying}`);
             await this.setCapabilityValue("speaker_playing", isPlaying).catch(
               this.error,
             );
@@ -219,16 +219,6 @@ class RoonOutputDevice extends Homey.Device {
             } catch (error) {
               this.error("Error setting image", error);
             }
-          }
-
-          // repeat this because Homey doesn't always seem to update the state of the zone
-          if (zone.state) {
-            let isPlaying = zone.state === "playing";
-            this.log("zone state", zone.state, isPlaying);
-
-            await this.setCapabilityValue("speaker_playing", isPlaying).catch(
-              this.error,
-            );
           }
 
           break;

@@ -18,6 +18,11 @@ class RoonOutputDriver extends Homey.Driver {
    * This should return an array with the data of devices that are available for pairing.
    */
   async onPairListDevices() {
+    if (zoneManager.transport === null) {
+      throw new Error(
+        "Roon is not connected. Make sure the Roon Server is running, and enable the Homey extension in Settings -> Extensions.",
+      );
+    }
     const zones = zoneManager.getZones();
     const outputs = [];
 

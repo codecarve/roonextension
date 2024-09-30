@@ -48,6 +48,11 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 
 ## Version History
 
+### 1.0.4
+- Updated manifest and readme
+- Improved pairing experience
+- Refactored driver for core into library
+
 ### 1.0.3
 
 - Add support for Homey SDK v3.
