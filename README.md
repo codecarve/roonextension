@@ -33,7 +33,7 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 ## Additional Information
 
 - This app is built on [Homey SDK v3](https://apps-sdk-v3.developer.homey.app) by Athom B.V. and the [Roon API](https://github.com/RoonLabs/node-roon-api) by Roon Labs.
-- If you have any feature requests or issues, feel free to submit them in the app's [GitHub repository](https://github.com/codecarve/homeyroon).
+- If you have any feature requests or issues, feel free to submit them in the app's [GitHub repository](https://github.com/codecarve/roonextension).
 - This software is built by enthusiasts and is provided "as is," with no warranty or liability. By using this app, Homey, or Roon, you accept that you are solely responsible for any potential damage to your equipment (e.g., setting the volume too high).
 - Code contributions are welcome. Feel free to send pull requests on GitHub!
 
@@ -46,7 +46,11 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 - Support for grouping and ungrouping zones directly from Homey.
 - Add an action to start a Roon radio stream.
 
+
 ## Version History
+
+### 1.0.5
+- Fix app store id
 
 ### 1.0.4
 - Updated manifest and readme

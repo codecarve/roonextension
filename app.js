@@ -15,12 +15,12 @@ class RoonApp extends Homey.App {
    */
   async onInit() {
     this.roonApi = new RoonApi({
-      extension_id: "nl.codecarve.homeyroon",
+      extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.0.4",
+      display_version: "1.0.5",
       publisher: "CodeCarve",
       email: "help@codecarve.nl",
-      website: "https://codecarve.nl",
+      website: "https://github.com/codecarve/roonextension/issues",
       log_level: "none",
       force_server: true,
       core_paired: (core) => {

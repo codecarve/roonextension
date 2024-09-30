@@ -13,5 +13,8 @@
   },
   "1.0.4": {
     "en": "Improve pairing experience and add documentation"
+  },
+  "1.0.5": {
+    "en": "Fix app store id"
   }
 }

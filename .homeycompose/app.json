@@ -1,6 +1,6 @@
 {
-  "id": "nl.codecarve.homeyroon",
-  "version": "1.0.4",
+  "id": "nl.codecarve.roonextension",
+  "version": "1.0.5",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -49,9 +49,9 @@
       "class": "speaker"
     }
   ],
-  "source": "https://github.com/codecarve/homeyroon",
+  "source": "https://github.com/codecarve/roonextension",
   "bugs": {
-    "url": "https://github.com/codecarve/homeyroon/issues"
+    "url": "https://github.com/codecarve/roonextension/issues"
   },
   "support": "mailto:help@codecarve.nl",
   "contributing": {
