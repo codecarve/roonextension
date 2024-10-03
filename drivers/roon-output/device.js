@@ -167,7 +167,7 @@ class RoonOutputDevice extends Homey.Device {
             ).catch(this.error);
           }
 
-          if (zone.now_playing?.queue_items_remaining) {
+          if (zone.queue_items_remaining) {
             await this.setCapabilityValue(
               "speaker_queue_items_remaining",
               +zone.queue_items_remaining,
