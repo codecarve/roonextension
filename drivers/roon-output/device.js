@@ -2,19 +2,29 @@
 
 const Homey = require("homey");
 
-const zoneManager = require("../../lib/zone-manager");
 const { writeFile } = require("../../lib/image-util");
+const zoneManager = require("../../lib/zone-manager");
 
 class RoonOutputDevice extends Homey.Device {
   async onInit() {
     this.zone = null;
 
     this.currentImage = "";
-    this.imagePath = `/userdata/${this.getData().id}.jpeg`;
+    const data = this.getData();
+    if (!data || !data.id) {
+      this.error("Device data or ID is undefined");
+      return;
+    }
+    this.imagePath = `/userdata/${data.id}.jpeg`;
 
     this.albumArtImage = await this.homey.images.createImage();
-    this.albumArtImage.setPath(this.imagePath);
-    await this.setAlbumArtImage(this.albumArtImage);
+    if (this.albumArtImage) {
+      this.albumArtImage.setPath(this.imagePath);
+      await this.setAlbumArtImage(this.albumArtImage);
+      this.log("Album art image created");
+    } else {
+      this.error("Failed to create album art image");
+    }
 
     this._boundOnZonesUpdated = this.onZonesUpdated.bind(this);
     zoneManager.on("zonesUpdated", this._boundOnZonesUpdated);
@@ -73,6 +83,15 @@ class RoonOutputDevice extends Homey.Device {
       this.onCapabilityVolumeSet.bind(this),
     );
 
+    // now we want the state of the output to be updated
+    const transport = zoneManager.getTransport();
+    if (transport !== null) {
+      this.zone = transport.zone_by_output_id(this.getData().id);
+      if (this.zone !== null) {
+        await this.updateZones([this.zone]);
+      }
+    }
+
     this.log("RoonOutputDevice has been initialized");
   }
 
@@ -96,7 +115,7 @@ class RoonOutputDevice extends Homey.Device {
     this.log("RoonZone has been deleted");
   }
 
-  updateZones = async (zones, disableNonExistingOutputs) => {
+  updateZones = async (zones) => {
     let found = false;
     for (let zone of zones) {
       for (let output of zone.outputs) {
@@ -107,7 +126,7 @@ class RoonOutputDevice extends Homey.Device {
 
           if (zone.state) {
             let isPlaying = zone.state === "playing";
-            this.log(`zone state: ${zone.state} playing: ${isPlaying}`);
+            this.log(`zone state: ${zone.state}, playing: ${isPlaying}`);
             await this.setCapabilityValue("speaker_playing", isPlaying).catch(
               this.error,
             );
@@ -201,13 +220,13 @@ class RoonOutputDevice extends Homey.Device {
               const newImage = zone.now_playing.image_key;
               if (newImage !== this.currentImage) {
                 const buffer = await new Promise((resolve, reject) => {
-                  zoneManager.imageDriver.get_image(
+                  zoneManager.getImageDriver()?.get_image(
                     zone.now_playing.image_key,
                     {
                       format: "image/jpeg",
                     },
                     (err, contentType, buffer) => {
-                      if (err) throw reject(err);
+                      if (err) return reject(err);
                       resolve(buffer);
                     },
                   );
@@ -225,23 +244,16 @@ class RoonOutputDevice extends Homey.Device {
         }
       }
     }
-    if (!found && disableNonExistingOutputs) {
-      // at startup, a full zone update will be sent and if we don't find the output, we need to set it unavailable
-      // await this.setUnavailable("This output was not found in Roon");
-      // zoneManager.off("zonesUpdated", this._boundOnZonesUpdated);
-      // zoneManager.off("zonesChanged", this._boundOnZonesChanged);
-      // zoneManager.off("zonesSeekChanged", this._boundOnZonesSeekChanged);
-    }
   };
 
   onZonesUpdated = async (zones) => {
     this.log("onZonesUpdated");
-    await this.updateZones(zones, true);
+    await this.updateZones(zones);
   };
 
   onZonesChanged = async (zones) => {
-    this.log("onZonesUpdated");
-    await this.updateZones(zones, true);
+    this.log("onZonesChanged");
+    await this.updateZones(zones);
   };
 
   onZonesSeekChanged = async (zones_seek_changed) => {
@@ -255,47 +267,45 @@ class RoonOutputDevice extends Homey.Device {
           await this.setCapabilityValue(
             "speaker_position",
             zone.seek_position,
-          ).catch(this.error);
+          ).catch((err) => this.error("Error setting speaker_position", err));
         }
         if (zone.queue_time_remaining !== undefined) {
           await this.setCapabilityValue(
             "speaker_queue_time_remaining",
             zone.queue_time_remaining,
-          ).catch(this.error);
+          ).catch((err) =>
+            this.error("Error setting speaker_queue_time_remaining", err),
+          );
         }
         break;
       }
     }
   };
 
-  onCapabilitySpeakerPlaying = async (value, opts) => {
+  onCapabilitySpeakerPlaying = (value, opts) => {
     this.log("onCapabilitySpeakerPlaying", value, opts);
-
-    if (!this.zone) {
-      return;
-    }
 
     const action = value ? "play" : "pause";
     try {
-      await zoneManager.transport.control(this.zone.zone_id, action);
+      zoneManager.getTransport()?.control(this.getData().id, action);
     } catch (err) {
-      throw new Error(`Setting speaker playing to ${action} failed! ${err}`);
+      this.error(`Setting speaker playing to ${action} failed! ${err}`);
     }
   };
 
-  onCapabilitySpeakerShuffle = async (value, opts) => {
+  onCapabilitySpeakerShuffle = (value, opts) => {
     this.log("onCapabilitySpeakerShuffle", value, opts);
 
     try {
-      await zoneManager.transport.change_settings(this.getData().id, {
+      zoneManager.getTransport()?.change_settings(this.getData().id, {
         shuffle: value,
       });
     } catch (err) {
-      throw new Error(`Setting shuffle to ${value} failed! ${err}`);
+      this.error(`Setting shuffle to ${value} failed! ${err}`);
     }
   };
 
-  onCapabilitySpeakerRepeat = async (value, opts) => {
+  onCapabilitySpeakerRepeat = (value, opts) => {
     this.log("onCapabilitySpeakerRepeat", value, opts);
 
     const loopMap = {
@@ -307,62 +317,74 @@ class RoonOutputDevice extends Homey.Device {
     const loop = loopMap[value] || "disabled";
 
     try {
-      await zoneManager.transport.change_settings(this.getData().id, { loop });
+      zoneManager.getTransport()?.change_settings(this.getData().id, { loop });
     } catch (err) {
-      throw new Error(`Setting loop to ${value} failed ${err}`);
+      this.error(`Setting loop to ${value} failed ${err}`);
     }
   };
 
-  onCapabilitySpeakerNext = async (value, opts) => {
+  onCapabilitySpeakerNext = (value, opts) => {
     this.log("onCapabilitySpeakerNext", value, opts);
 
     try {
-      await zoneManager.transport.control(this.getData().id, "next");
+      zoneManager.getTransport()?.control(this.getData().id, "next");
     } catch (err) {
-      throw new Error(`Setting speaker playing to next failed! ${err}`);
+      this.error(`Setting speaker playing to next failed! ${err}`);
     }
   };
 
-  onCapabilitySpeakerPrevious = async (value, opts) => {
+  onCapabilitySpeakerPrevious = (value, opts) => {
     this.log("onCapabilitySpeakerPrevious", value, opts);
 
     try {
-      await zoneManager.transport.control(this.getData().id, "previous");
+      zoneManager.getTransport()?.control(this.getData().id, "previous");
     } catch (err) {
-      throw new Error(`Setting speaker playing to previous failed! ${err}`);
+      this.error(`Setting speaker playing to previous failed! ${err}`);
     }
   };
 
-  onCapabilitySpeakerPosition = async (value, opts) => {
+  onCapabilitySpeakerPosition = (value, opts) => {
     this.log("onCapabilitySpeakerPosition", value, opts);
 
     try {
-      await zoneManager.transport.seek(this.getData().id, "absolute", value);
+      zoneManager.getTransport()?.seek(this.getData().id, "absolute", value);
     } catch (err) {
-      throw new Error(`Setting speaker position ${value} failed! ${err}`);
+      this.error(`Setting speaker position ${value} failed! ${err}`);
     }
   };
 
   changeVolume = async (direction) => {
     const volumeChangePromises = this.zone.outputs
-      .filter((output) => output.output_id === this.getData().id) // only this output!
+      .filter((output) => output.output_id === this.getData().id) // Only this output!
       .filter((output) =>
         direction > 0
           ? +output.volume.value < +output.volume.soft_limit
           : +output.volume.value > 0,
       )
-      .map((output) =>
-        zoneManager.transport.change_volume(
-          output.output_id,
-          "relative",
-          direction,
-        ),
+      .map(
+        (output) =>
+          new Promise((resolve, reject) => {
+            zoneManager
+              .getTransport()
+              ?.change_volume(
+                output.output_id,
+                "relative",
+                direction,
+                (err) => {
+                  if (err) {
+                    reject(new Error("Failed to change volume: " + err));
+                  } else {
+                    resolve();
+                  }
+                },
+              );
+          }),
       );
 
     try {
       await Promise.all(volumeChangePromises);
     } catch (error) {
-      this.error(error);
+      this.error("Error changing volume: " + error.message);
     }
   };
 
@@ -379,10 +401,24 @@ class RoonOutputDevice extends Homey.Device {
   onCapabilityVolumeMute = async (value, opts) => {
     this.log("onCapabilityVolumeMute", value, opts);
 
+    if (!this.zone) {
+      this.error("onCapabilityVolumeMute - Zone is not available");
+      return;
+    }
+
+    if (!Array.isArray(this.zone.outputs)) {
+      this.error(
+        "onCapabilityVolumeMute - Zone outputs are not available or invalid.",
+      );
+      return;
+    }
+
     const volumeMutePromises = this.zone.outputs
       .filter((output) => output.output_id === this.getData().id) // only this output!
       .map((output) =>
-        zoneManager.transport.mute(output.output_id, value ? "mute" : "unmute"),
+        zoneManager
+          .getTransport()
+          ?.mute(output.output_id, value ? "mute" : "unmute"),
       );
 
     try {
@@ -400,26 +436,35 @@ class RoonOutputDevice extends Homey.Device {
     }
 
     if (+value < 0 || +value > 1) {
-      throw new Error("Volume must be between 0 and 1");
+      this.error("Volume must be between 0 and 1");
+      return;
     }
 
     const output = this.zone.outputs.find(
       (output) => output.output_id === this.getData().id,
     );
     if (!output) {
-      throw new Error("Output not found");
+      this.error("Output not found");
+      return;
     }
 
     const volumeToSet = Math.min(+value * 100, output.volume.soft_limit);
+
     try {
-      await zoneManager.transport.change_volume(
-        this.getData().id,
-        "absolute",
-        volumeToSet,
-      );
+      await new Promise((resolve, reject) => {
+        zoneManager
+          .getTransport()
+          ?.change_volume(this.getData().id, "absolute", volumeToSet, (err) => {
+            if (err) {
+              reject(new Error("Failed to set volume: " + err));
+            } else {
+              resolve();
+            }
+          });
+      });
       await this.setCapabilityValue("volume_set", volumeToSet / 100);
     } catch (err) {
-      throw new Error(`Setting volume failed! ${err}`);
+      this.error(`Setting volume failed: ${err.message}`);
     }
   };
 }

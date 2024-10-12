@@ -49,6 +49,10 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 
 ## Version History
 
+### 1.0.6
+- Fix label Queue items remaining
+- Various bug fixes and refactoring
+
 ### 1.0.5
 - Fix app store id
 

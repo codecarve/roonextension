@@ -14,10 +14,16 @@ class RoonApp extends Homey.App {
    * onInit is called when the app is initialized.
    */
   async onInit() {
+    this.transport = null;
+    this.imageDriver = null;
+    this.unsubscribe = null;
+
+    this.log("RoonApp has been initialized");
+
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.0.5",
+      display_version: "1.0.6",
       publisher: "CodeCarve",
       email: "help@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
@@ -26,15 +32,55 @@ class RoonApp extends Homey.App {
       core_paired: (core) => {
         this.log("Roon core is pairing...");
 
-        this.handleCorePaired(core);
+        if (!core.services.RoonApiTransport || !core.services.RoonApiImage) {
+          throw new Error("Roon API transport or image services are undefined");
+        }
+
+        try {
+          this.transport = core.services.RoonApiTransport;
+          this.imageDriver = core.services.RoonApiImage;
+
+          this.unsubscribe = this.transport.subscribe_zones(
+            (response, data) => {
+              zoneManager.updateZones(response, data);
+            },
+          );
+
+          zoneManager.updateTransport(this.transport);
+          zoneManager.updateImageDriver(this.imageDriver);
+        } catch (error) {
+          this.error("Error handling core pairing", error);
+        }
 
         this.log("Roon core is paired");
       },
       core_unpaired: (core) => {
         this.log("Roon Core is unpairing...");
-        zoneManager.updateTransport(null);
-        zoneManager.updateImageDriver(null);
-        this.roonApi.start_discovery();
+
+        try {
+          this.transport = null;
+          this.imageDriver = null;
+          if (this.unsubscribe) {
+            if (typeof this.unsubscribe === "function") {
+              this.unsubscribe();
+            } else {
+              this.log("Unsubscribe is not a function");
+            }
+            this.unsubscribe = null;
+          }
+          zoneManager.updateTransport(null);
+          zoneManager.updateImageDriver(null);
+        } catch (error) {
+          this.error("Error handling core unpairing", error);
+        }
+
+        try {
+          this.roonApi.start_discovery();
+        } catch (error) {
+          this.error("Error starting discovery", error);
+        }
+
+        this.log("Roon core is unpaired and started discovery");
       },
       set_persisted_state: (state) => {
         //this.log("set_persisted_state", JSON.stringify(state, null, 2));
@@ -42,6 +88,9 @@ class RoonApp extends Homey.App {
       },
       get_persisted_state: () => {
         const state = this.homey.settings.get("roonstate") || {};
+        if (typeof state !== "object") {
+          throw new Error("Persisted state is not an object");
+        }
         //this.log("get_persisted_state", JSON.stringify(state, null, 2));
         return state;
       },
@@ -58,22 +107,6 @@ class RoonApp extends Homey.App {
     svc_status.set_status("All is good", false);
 
     this.log("RoonApp has been initialized");
-  }
-
-  async handleCorePaired(core) {
-    this.transport = core.services.RoonApiTransport;
-    this.imageDriver = core.services.RoonApiImage;
-
-    try {
-      zoneManager.updateTransport(core.services.RoonApiTransport);
-      zoneManager.updateImageDriver(core.services.RoonApiImage);
-
-      this.transport.subscribe_zones((response, data) => {
-        zoneManager.updateZones(data);
-      });
-    } catch (error) {
-      this.error("Error handling core pairing", error);
-    }
   }
 }
 

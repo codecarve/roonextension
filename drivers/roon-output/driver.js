@@ -18,28 +18,40 @@ class RoonOutputDriver extends Homey.Driver {
    * This should return an array with the data of devices that are available for pairing.
    */
   async onPairListDevices() {
-    if (zoneManager.transport === null) {
+    const transport = zoneManager.getTransport();
+    if (transport == null) {
+      // check for null or undefined
       throw new Error(
         "Roon is not connected. Make sure the Roon Server is running, and enable the Homey extension in Settings -> Extensions.",
       );
     }
-    const zones = zoneManager.getZones();
-    const outputs = [];
 
-    for (let zone of zones) {
-      for (let output of zone.outputs) {
-        outputs.push(output);
-      }
-    }
-    return outputs.map((output) => {
-      return {
-        name: output.display_name,
-        data: {
-          id: output.output_id,
-        },
-        store: {},
-        settings: {},
-      };
+    return new Promise((resolve, reject) => {
+      transport.get_outputs((success, body) => {
+        if (
+          !body ||
+          !Array.isArray(body.outputs) ||
+          body.outputs.length === 0
+        ) {
+          reject(new Error("No outputs found."));
+        }
+
+        const devices = body.outputs.map((output) => {
+          if (!output.display_name || !output.output_id) {
+            throw new Error("Invalid output data.");
+          }
+          return {
+            name: output.display_name,
+            data: {
+              id: output.output_id,
+            },
+            store: {},
+            settings: {},
+          };
+        });
+
+        resolve(devices);
+      });
     });
   }
 }

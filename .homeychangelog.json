@@ -16,5 +16,8 @@
   },
   "1.0.5": {
     "en": "Fix app store id"
+  },
+  "1.0.6": {
+    "en": "Refactor, Fixes for stability and maintenance"
   }
 }
