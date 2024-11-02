@@ -19,5 +19,8 @@
   },
   "1.0.6": {
     "en": "Refactor, Fixes for stability and maintenance"
+  },
+  "1.0.7": {
+    "en": "Enabling and disabling devices, small refactor for maintainability"
   }
 }

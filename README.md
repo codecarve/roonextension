@@ -49,6 +49,10 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 
 ## Version History
 
+### 1.0.7
+- Refactor for handling images
+- Enabling/disabling devices, re-enabling zone when zone is re-added with the same name
+
 ### 1.0.6
 - Fix label Queue items remaining
 - Various bug fixes and refactoring

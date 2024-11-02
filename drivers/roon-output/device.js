@@ -2,14 +2,14 @@
 
 const Homey = require("homey");
 
-const { writeFile } = require("../../lib/image-util");
 const zoneManager = require("../../lib/zone-manager");
+const imageUtil = require("../../lib/image-util");
 
 class RoonOutputDevice extends Homey.Device {
   async onInit() {
     this.zone = null;
 
-    this.currentImage = "";
+    this.currentImageKey = "";
     const data = this.getData();
     if (!data || !data.id) {
       this.error("Device data or ID is undefined");
@@ -17,14 +17,12 @@ class RoonOutputDevice extends Homey.Device {
     }
     this.imagePath = `/userdata/${data.id}.jpeg`;
 
-    this.albumArtImage = await this.homey.images.createImage();
-    if (this.albumArtImage) {
-      this.albumArtImage.setPath(this.imagePath);
-      await this.setAlbumArtImage(this.albumArtImage);
-      this.log("Album art image created");
-    } else {
-      this.error("Failed to create album art image");
-    }
+    this.albumArtImage = await imageUtil.createAlbumArtImage(
+      this.homey,
+      this.imagePath,
+    );
+    await this.setAlbumArtImage(this.albumArtImage);
+    this.log("Album art image created");
 
     this._boundOnZonesUpdated = this.onZonesUpdated.bind(this);
     zoneManager.on("zonesUpdated", this._boundOnZonesUpdated);
@@ -219,27 +217,15 @@ class RoonOutputDevice extends Homey.Device {
             const imageDriver = zoneManager.getImageDriver();
 
             if (imageDriver && zone && zone.now_playing) {
-              try {
-                const newImage = zone.now_playing.image_key;
-                if (newImage !== this.currentImage) {
-                  const buffer = await new Promise((resolve, reject) => {
-                    zoneManager.getImageDriver()?.get_image(
-                      zone.now_playing.image_key,
-                      {
-                        format: "image/jpeg",
-                      },
-                      (err, contentType, buffer) => {
-                        if (err) return reject(err);
-                        resolve(buffer);
-                      },
-                    );
-                  });
-                  await writeFile(this.imagePath, buffer, "binary");
-                  await this.albumArtImage.update();
-                  this.currentImage = newImage;
-                }
-              } catch (error) {
-                this.error("Error setting image", error);
+              const newImageKey = zone.now_playing.image_key;
+              if (newImageKey !== this.currentImageKey) {
+                await imageUtil.fetchAndSaveImage(
+                  imageDriver,
+                  newImageKey,
+                  this.imagePath,
+                );
+                await this.albumArtImage.update();
+                this.currentImageKey = newImageKey;
               }
             }
           } catch (err) {
