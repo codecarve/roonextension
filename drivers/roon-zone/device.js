@@ -202,10 +202,9 @@ class RoonZoneDevice extends Homey.Device {
               try {
                 let is_muted = output.volume.is_muted;
                 await this.setCapabilityValue("volume_mute", is_muted);
-              } catch (error) {
+              } catch (err) {
                 this.error(
-                  `Error setting volume_mute for output ${output.output_id}`,
-                  error,
+                  `Error setting volume_mute for output ${output.output_id}! Error: ${err.message}`,
                 );
               }
             }
@@ -215,7 +214,9 @@ class RoonZoneDevice extends Homey.Device {
         }
 
         try {
-          if (zone && zone.now_playing) {
+          const imageDriver = zoneManager.getImageDriver();
+
+          if (imageDriver && zone && zone.now_playing) {
             const newImage = zone.now_playing.image_key;
             if (newImage !== this.currentImage) {
               const buffer = await new Promise((resolve, reject) => {
@@ -235,8 +236,8 @@ class RoonZoneDevice extends Homey.Device {
               this.currentImage = newImage;
             }
           }
-        } catch (error) {
-          this.error("Error setting image", error);
+        } catch (err) {
+          this.error(`Error setting image. Error: ${err.message}`);
         }
 
         break;
@@ -276,12 +277,13 @@ class RoonZoneDevice extends Homey.Device {
 
   onCapabilitySpeakerPlaying = (value, opts) => {
     this.log("onCapabilitySpeakerPlaying", value, opts);
-
     const action = value ? "play" : "pause";
     try {
       zoneManager.getTransport()?.control(this.getData().id, action);
     } catch (err) {
-      this.error(`Setting speaker playing to ${action} failed! ${err}`);
+      this.error(
+        `onCapabilitySpeakerPlaying - Setting speaker playing to ${action} failed! Error: ${err.message}`,
+      );
     }
   };
 
@@ -293,7 +295,9 @@ class RoonZoneDevice extends Homey.Device {
         shuffle: value,
       });
     } catch (err) {
-      this.error(`Setting shuffle to ${value} failed! ${err}`);
+      this.error(
+        `onCapabilitySpeakerShuffle - Setting shuffle to ${value} failed! Error: ${err.message}`,
+      );
     }
   };
 
@@ -311,7 +315,9 @@ class RoonZoneDevice extends Homey.Device {
     try {
       zoneManager.getTransport()?.change_settings(this.getData().id, { loop });
     } catch (err) {
-      this.error(`Setting loop to ${value} failed! ${err}`);
+      this.error(
+        `onCapabilitySpeakerRepeat - Setting loop to ${value} failed! Error: ${err.message}`,
+      );
     }
   };
 
@@ -321,7 +327,9 @@ class RoonZoneDevice extends Homey.Device {
     try {
       zoneManager.getTransport()?.control(this.getData().id, "next");
     } catch (err) {
-      this.error(`Setting speaker playing to next failed! ${err}`);
+      this.error(
+        `onCapabilitySpeakerNext - Setting speaker playing to next failed! Error: ${err.message}`,
+      );
     }
   };
 
@@ -331,7 +339,9 @@ class RoonZoneDevice extends Homey.Device {
     try {
       zoneManager.getTransport()?.control(this.getData().id, "previous");
     } catch (err) {
-      this.error(`Setting speaker playing to previous failed! ${err}`);
+      this.error(
+        `onCapabilitySpeakerPrevious - Setting speaker playing to previous failed! Error: ${err.message}`,
+      );
     }
   };
 
@@ -341,11 +351,18 @@ class RoonZoneDevice extends Homey.Device {
     try {
       zoneManager.getTransport()?.seek(this.getData().id, "absolute", value);
     } catch (err) {
-      this.error(`Setting speaker position ${value} failed! ${err}`);
+      this.error(
+        `onCapabilitySpeakerPosition - Setting speaker position ${value} failed! Error: ${err.message}`,
+      );
     }
   };
 
   changeVolume = async (direction) => {
+    const transport = zoneManager.getTransport();
+    if (!transport) {
+      this.error("changeVolume - Transport is not available");
+      return;
+    }
     if (!this.zone) {
       this.error("changeVolume - Zone is not available");
       return;
@@ -361,28 +378,31 @@ class RoonZoneDevice extends Homey.Device {
           ? +output.volume.value < +output.volume.soft_limit
           : +output.volume.value > 0,
       )
-      .map(
-        (output) =>
-          new Promise((resolve, reject) => {
-            const transport = zoneManager.getTransport();
-            if (transport) {
-              transport.change_volume(
-                output.output_id,
-                "relative",
-                direction,
-                (error) => {
-                  if (error) {
-                    reject(new Error("Failed to change volume: " + error));
-                  } else {
-                    resolve();
-                  }
-                },
-              );
-            } else {
-              reject(new Error("Transport is not available"));
-            }
-          }),
-      );
+      .map((output) => {
+        return new Promise((resolve, reject) => {
+          const transport = zoneManager.getTransport();
+          if (transport) {
+            transport.change_volume(
+              output.output_id,
+              "relative",
+              direction,
+              (err) => {
+                if (err) {
+                  reject(
+                    new Error(
+                      `changeVolume - Failed to change volume! Error: ${err.message}`,
+                    ),
+                  );
+                } else {
+                  resolve();
+                }
+              },
+            );
+          } else {
+            reject(new Error("changeVolume - Transport is not available"));
+          }
+        });
+      });
 
     try {
       await Promise.all(volumeChangePromises);
@@ -424,24 +444,32 @@ class RoonZoneDevice extends Homey.Device {
             transport.mute(
               output.output_id,
               value ? "mute" : "unmute",
-              (error) => {
-                if (error) {
-                  reject(new Error("Failed to mute/unmute: " + error));
+              (err) => {
+                if (err) {
+                  reject(
+                    new Error(
+                      `onCapabilityVolumeMute - Failed to mute/unmute! Error: ${err.message}`,
+                    ),
+                  );
                 } else {
                   resolve();
                 }
               },
             );
           } else {
-            reject(new Error("Transport is not available"));
+            reject(
+              new Error("onCapabilityVolumeMute - Transport is not available"),
+            );
           }
         }),
     );
 
     try {
       await Promise.all(volumeMutePromises);
-    } catch (error) {
-      this.error("Error handling mute/unmute: " + error.message);
+    } catch (err) {
+      this.error(
+        `onCapabilityVolumeMute - Error handling mute/unmute! Error: ${err.message}`,
+      );
     }
   };
 }
