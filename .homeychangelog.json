@@ -18,6 +18,9 @@
     "en": "Fix app store id"
   },
   "1.0.6": {
-    "en": "Refactor, Fixes for stability and maintenance"
+    "en": "Refactor, fixes for stability and maintenance"
+  },
+  "1.0.7": {
+    "en": "Fix for crash when retrying to connect to Roon"
   }
 }

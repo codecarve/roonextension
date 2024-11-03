@@ -23,7 +23,7 @@ class RoonApp extends Homey.App {
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.0.6",
+      display_version: "1.0.7",
       publisher: "CodeCarve",
       email: "help@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
@@ -74,13 +74,7 @@ class RoonApp extends Homey.App {
           this.error("Error handling core unpairing", error);
         }
 
-        try {
-          this.roonApi.start_discovery();
-        } catch (error) {
-          this.error("Error starting discovery", error);
-        }
-
-        this.log("Roon core is unpaired and started discovery");
+        this.log("Roon core is unpaired");
       },
       set_persisted_state: (state) => {
         //this.log("set_persisted_state", JSON.stringify(state, null, 2));

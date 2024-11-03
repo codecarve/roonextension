@@ -33,19 +33,21 @@ class RoonZoneDriver extends Homey.Driver {
           reject(new Error("No zones found."));
         }
 
-        const devices = body.zones.map((zone) => {
-          if (!zone.display_name || !zone.zone_id) {
-            throw new Error("Invalid zone data.");
-          }
-          return {
-            name: zone.display_name,
-            data: {
-              id: zone.zone_id,
-            },
-            store: {},
-            settings: {},
-          };
-        });
+        const devices = body.zones
+          .filter((zone) => zone.outputs && zone.outputs.length > 1)
+          .map((zone) => {
+            if (!zone.display_name || !zone.zone_id) {
+              throw new Error("Invalid zone data.");
+            }
+            return {
+              name: zone.display_name,
+              data: {
+                id: zone.zone_id,
+              },
+              store: {},
+              settings: {},
+            };
+          });
 
         resolve(devices);
       });
