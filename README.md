@@ -50,8 +50,10 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 ## Version History
 
 ### 1.0.7
-- Refactor for handling images
-- Enabling/disabling devices, re-enabling zone when zone is re-added with the same name
+- Code refactor for handling images
+- Fix for crash when retrying to re-connect to Roon
+- Update app Icon for zones
+- Update: only show zones with multiple outputs when pairing
 
 ### 1.0.6
 - Fix label Queue items remaining
