@@ -74,13 +74,7 @@ class RoonApp extends Homey.App {
           this.error("Error handling core unpairing", error);
         }
 
-        try {
-          this.roonApi.start_discovery();
-        } catch (error) {
-          this.error("Error starting discovery", error);
-        }
-
-        this.log("Roon core is unpaired and started discovery");
+        this.log("Roon core is unpaired");
       },
       set_persisted_state: (state) => {
         //this.log("set_persisted_state", JSON.stringify(state, null, 2));
