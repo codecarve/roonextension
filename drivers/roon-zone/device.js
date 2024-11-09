@@ -76,6 +76,11 @@ class RoonZoneDevice extends Homey.Device {
       this.onCapabilityVolumeMute.bind(this),
     );
 
+    this.registerCapabilityListener(
+      "speaker_auto_radio",
+      this.onCapabilityAutoRadio.bind(this),
+    );
+
     // now we want the state of the zone to be updated
     const transport = zoneManager.getTransport();
     if (transport) {
@@ -84,6 +89,13 @@ class RoonZoneDevice extends Homey.Device {
         await this.updateZones([this.zone]);
       }
     }
+
+    const autoRadioAction = this.homey.flow.getActionCard(
+      "speaker_auto_radio_zone",
+    );
+    autoRadioAction.registerRunListener(async (args, state) => {
+      await this.onCapabilityAutoRadio(args.enabled, null);
+    });
 
     this.log("RoonZoneDevice has been initialized");
   }
@@ -118,7 +130,7 @@ class RoonZoneDevice extends Homey.Device {
 
         if (zone.state) {
           let isPlaying = zone.state === "playing";
-          this.log(`zone state: ${zone.state}, playing: ${isPlaying}`);
+          this.log(`Zone state: ${zone.state}, playing: ${isPlaying}`);
 
           await this.setCapabilityValue("speaker_playing", isPlaying).catch(
             this.error,
@@ -130,6 +142,15 @@ class RoonZoneDevice extends Homey.Device {
             "speaker_shuffle",
             zone.settings.shuffle,
           ).catch(this.error);
+
+          if (this.hasCapability("speaker_auto_radio")) {
+            await this.setCapabilityValue(
+              "speaker_auto_radio",
+              zone.settings.auto_radio,
+            ).catch(this.error);
+          } else {
+            this.log("Auto radio is not available");
+          }
 
           try {
             const loopMap = {
@@ -479,6 +500,24 @@ class RoonZoneDevice extends Homey.Device {
     } catch (err) {
       this.error(
         `onCapabilityVolumeMute - Error handling mute/unmute! Error: ${err.message}`,
+      );
+    }
+  };
+
+  onCapabilityAutoRadio = (value, opts) => {
+    this.log("onCapabilityAutoRadio", value, opts);
+
+    try {
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilityAutoRadio - Transport is not available");
+      }
+      transport.change_settings(this.getData().id, {
+        auto_radio: value,
+      });
+    } catch (err) {
+      this.error(
+        `onCapabilityAutoRadio - Setting auto_radio to ${value} failed! Error: ${err.message}`,
       );
     }
   };

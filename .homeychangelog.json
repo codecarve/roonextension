@@ -22,5 +22,8 @@
   },
   "1.0.7": {
     "en": "Fix for crash when retrying to connect to Roon"
+  },
+  "1.0.8": {
+    "en": "Add convenience switch capability"
   }
 }

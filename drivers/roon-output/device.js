@@ -81,6 +81,24 @@ class RoonOutputDevice extends Homey.Device {
       this.onCapabilityVolumeSet.bind(this),
     );
 
+    this.registerCapabilityListener(
+      "convenience_switch",
+      this.onCapabilityConvenienceSwitch.bind(this),
+    );
+
+    this.registerCapabilityListener(
+      "speaker_auto_radio",
+      this.onCapabilityAutoRadio.bind(this),
+    );
+
+    const convenienceSwitchAction = this.homey.flow.getActionCard(
+      "convenience_switch_output",
+    );
+
+    convenienceSwitchAction.registerRunListener(async (args, state) => {
+      await this.onCapabilityConvenienceSwitch(true, null);
+    });
+
     // now we want the state of the output to be updated
     const transport = zoneManager.getTransport();
     if (transport !== null) {
@@ -89,6 +107,13 @@ class RoonOutputDevice extends Homey.Device {
         await this.updateZones([this.zone]);
       }
     }
+
+    const autoRadioAction = this.homey.flow.getActionCard(
+      "speaker_auto_radio_output",
+    );
+    autoRadioAction.registerRunListener(async (args, state) => {
+      await this.onCapabilityAutoRadio(args.enabled, null);
+    });
 
     this.log("RoonOutputDevice has been initialized");
   }
@@ -124,7 +149,7 @@ class RoonOutputDevice extends Homey.Device {
 
           if (zone.state) {
             let isPlaying = zone.state === "playing";
-            this.log(`zone state: ${zone.state}, playing: ${isPlaying}`);
+            this.log(`Zone state: ${zone.state}, playing: ${isPlaying}`);
             await this.setCapabilityValue("speaker_playing", isPlaying).catch(
               this.error,
             );
@@ -135,6 +160,15 @@ class RoonOutputDevice extends Homey.Device {
               "speaker_shuffle",
               zone.settings.shuffle,
             ).catch(this.error);
+
+            if (this.hasCapability("speaker_auto_radio")) {
+              await this.setCapabilityValue(
+                "speaker_auto_radio",
+                zone.settings.auto_radio,
+              ).catch(this.error);
+            } else {
+              this.log("Auto radio is not available");
+            }
 
             try {
               const loopMap = {
@@ -526,6 +560,44 @@ class RoonOutputDevice extends Homey.Device {
     } catch (err) {
       this.error(
         `onCapabilityVolumeSet - Setting volume failed! Error: ${err.message}`,
+      );
+    }
+  };
+
+  onCapabilityConvenienceSwitch = (value, opts) => {
+    this.log("onCapabilityConvenienceSwitch", value, opts);
+
+    try {
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error(
+          "onCapabilityConvenienceSwitch - Transport is not available",
+        );
+      }
+      transport.convenience_switch(this.getData().id, {});
+    } catch (err) {
+      this.error(
+        `onCapabilityConvenienceSwitch - Triggering convenience switch failed! Error: ${err.message}`,
+      );
+    }
+
+    this.setCapabilityValue("convenience_switch", false);
+  };
+
+  onCapabilityAutoRadio = (value, opts) => {
+    this.log("onCapabilityAutoRadio", value, opts);
+
+    try {
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilityAutoRadio - Transport is not available");
+      }
+      transport.change_settings(this.getData().id, {
+        auto_radio: value,
+      });
+    } catch (err) {
+      this.error(
+        `onCapabilityAutoRadio - Setting auto_radio to ${value} failed! Error: ${err.message}`,
       );
     }
   };

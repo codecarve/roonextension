@@ -49,6 +49,12 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 
 ## Version History
 
+### 1.0.8
+- Added: convenience switch capability
+- Added: auto radio capability
+- Update: several icons are updated
+- Update: community forum topic id
+
 ### 1.0.7
 - Code refactor for handling images
 - Fix for crash when retrying to re-connect to Roon

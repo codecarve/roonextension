@@ -1,0 +1,18 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <!-- Outer Circle -->
+    <circle cx="24" cy="24" r="22" stroke="#000" stroke-width="2" fill="none" />
+
+    <!-- Middle Circle -->
+    <circle cx="24" cy="24" r="15" stroke="#000" stroke-width="2" fill="none" />
+
+    <!-- Play Button -->
+    <polygon points="20,16 20,32 32,24" fill="#000" />
+
+    <!-- Dots on Outer Circle with Transparent Bumper -->
+    <circle cx="24" cy="2" r="1.5" fill="#000" stroke="#000" stroke-width="0.5" />
+    <circle cx="46" cy="24" r="1.5" fill="#000" stroke="#000" stroke-width="0.5" />
+
+    <!-- Dots on Middle Circle with Transparent Bumper -->
+    <circle cx="24" cy="9" r="1.5" fill="#000" stroke="#000" stroke-width="0.5" />
+    <circle cx="39" cy="24" r="1.5" fill="#000" stroke="#000" stroke-width="0.5" />
+</svg>

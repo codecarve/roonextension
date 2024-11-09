@@ -18,7 +18,8 @@
     "speaker_queue_time_remaining",
     "volume_up",
     "volume_down",
-    "volume_mute"
+    "volume_mute",
+    "speaker_auto_radio"
   ],
   "platforms": [
     "local"

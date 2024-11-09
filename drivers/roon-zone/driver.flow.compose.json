@@ -1,0 +1,22 @@
+{
+  "actions": [
+    {
+      "id": "speaker_auto_radio_zone",
+      "title": {
+        "en": "Roon Radio",
+        "nl": "Roon Radio"
+      },
+      "titleFormatted": {
+        "en": "Roon Radio [[enabled]]",
+        "nl": "Roon Radio [[enabled]]"
+      },
+      "args": [
+        {
+          "name": "enabled",
+          "type": "checkbox",
+          "title": { "en": "Enabled", "nl": "Actief" }
+        }
+      ]
+    }
+  ]
+}

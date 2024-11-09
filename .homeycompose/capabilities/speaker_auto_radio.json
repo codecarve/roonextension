@@ -1,0 +1,9 @@
+{
+  "type": "boolean",
+  "title": { "en": "Roon radio", "nl": "Roon radio" },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "button",
+  "uiQuickAction": false,
+  "icon": "/assets/auto_radio.svg"
+}

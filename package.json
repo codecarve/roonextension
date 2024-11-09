@@ -1,6 +1,6 @@
 {
   "name": "nl.codecarve.roonextension",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "app.js",
   "scripts": {},
   "dependencies": {

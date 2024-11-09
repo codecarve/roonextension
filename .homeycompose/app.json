@@ -1,6 +1,6 @@
 {
   "id": "nl.codecarve.roonextension",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -39,29 +39,67 @@
       "name": {
         "en": "Roon Zone Device"
       },
-      "class": "speaker"
+      "class": "speaker",
+      "capabilities": [
+        "speaker_auto_radio"
+      ]
     },
     {
       "id": "roon-output",
       "name": {
         "en": "Roon Output Device"
       },
-      "class": "speaker"
+      "class": "speaker",
+      "capabilities": [
+        "convenience_switch",
+        "speaker_auto_radio"
+      ],
+      "capabilitiesOptions": {
+        "convenience_switch": {
+          "title": {
+            "en": "Convenience Switch",
+            "nl": "Convenience Switch"
+          },
+          "type": "boolean",
+          "set": true,
+          "get": false
+        }
+      },
+      "flow": {
+        "actions": [
+          {
+            "id": "convenience_switch",
+            "title": {
+              "en": "Wake-up Output",
+              "nl": "Wake-up Output"
+            },
+            "hint": {
+              "en": "The output that should be woken up.",
+              "nl": "The output that should be woken up."
+            },
+            "args": [
+              {
+                "name": "device",
+                "type": "device",
+                "filter": "driver_id=roon-output"
+              }
+            ]
+          }
+        ]
+      }
     }
   ],
   "source": "https://github.com/codecarve/roonextension",
   "bugs": {
     "url": "https://github.com/codecarve/roonextension/issues"
   },
-  "support": "mailto:help@codecarve.nl",
+  "support": "mailto:hello@codecarve.nl",
   "contributing": {
     "donate": {
       "paypal": {
         "username": "codecarve"
-      },
-      "githubSponsors": {
-        "username": "codecarve"
       }
     }
-  }
+  },
+  "homeyCommunityTopicId": 119818
 }

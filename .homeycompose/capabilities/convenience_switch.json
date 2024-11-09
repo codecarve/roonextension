@@ -1,0 +1,9 @@
+{
+  "type": "boolean",
+  "title": { "en": "Wake-up", "nl": "Wake-up" },
+  "getable": false,
+  "setable": true,
+  "uiComponent": "button",
+  "uiQuickAction": false,
+  "icon": "/assets/convenience_switch.svg"
+}

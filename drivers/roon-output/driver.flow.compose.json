@@ -1,0 +1,29 @@
+{
+  "actions": [
+    {
+      "id": "convenience_switch_output",
+      "title": {
+        "en": "Wake-up",
+        "nl": "Zet aan"
+      }
+    },
+    {
+      "id": "speaker_auto_radio_output",
+      "title": {
+        "en": "Roon Radio",
+        "nl": "Roon Radio"
+      },
+      "titleFormatted": {
+        "en": "Roon Radio [[enabled]]",
+        "nl": "Roon Radio [[enabled]]"
+      },
+      "args": [
+        {
+          "name": "enabled",
+          "type": "checkbox",
+          "title": { "en": "Enabled", "nl": "Actief" }
+        }
+      ]
+    }
+  ]
+}
