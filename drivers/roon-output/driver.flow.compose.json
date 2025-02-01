@@ -1,10 +1,25 @@
 {
   "actions": [
     {
-      "id": "convenience_switch_output",
+      "id": "speaker_sleep",
       "title": {
-        "en": "Wake-up",
+        "en": "Sleep",
+        "nl": "Zet uit"
+      },
+      "titleFormatted": {
+        "en": "Set output to sleep",
+        "nl": "Zet output uit"
+      }
+    },
+    {
+      "id": "speaker_wake_up",
+      "title": {
+        "en": "Wake up",
         "nl": "Zet aan"
+      },
+      "titleFormatted": {
+        "en": "Wake up output",
+        "nl": "Zet output aan"
       }
     },
     {
@@ -22,6 +37,48 @@
           "name": "enabled",
           "type": "checkbox",
           "title": { "en": "Enabled", "nl": "Actief" }
+        }
+      ]
+    },
+    {
+      "id": "artist_radio_output",
+      "title": {
+        "en": "Play Artist",
+        "nl": "Speel Artiest"
+      },
+      "titleFormatted": {
+        "en": "Play Artist [[artist]]",
+        "nl": "Speel Artiest [[artist]]"
+      },
+      "args": [
+        {
+          "name": "artist",
+          "type": "autocomplete",
+          "title": {
+            "en": "Artist",
+            "nl": "Artiest"
+          }
+        }
+      ]
+    },
+    {
+      "id": "internet_radio_output",
+      "title": {
+        "en": "Play Internet Radio",
+        "nl": "Speel Internet Radio"
+      },
+      "titleFormatted": {
+        "en": "Play Internet Radio [[internet_radio]]",
+        "nl": "Speel Internet Radio [[internet_radio]]"
+      },
+      "args": [
+        {
+          "name": "internet_radio",
+          "type": "autocomplete",
+          "title": {
+            "en": "Internet Radio",
+            "nl": "Internet Radio"
+          }
         }
       ]
     }

@@ -1,0 +1,9 @@
+{
+  "type": "boolean",
+  "title": { "en": "Sleep", "nl": "Slaapstand" },
+  "getable": false,
+  "setable": true,
+  "uiComponent": null,
+  "uiQuickAction": false,
+  "icon": "/assets/sleep.svg"
+}

@@ -39,15 +39,21 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 
 ## Roadmap
 
-- Add custom actions, such as a convenience switch.
 - Create a settings page allowing users to configure the Roon Core IP address and port.
 - Add support for multiple Roon cores.
 - Implement dynamic zones that automatically update device status in Homey based on changes in Roon.
 - Support for grouping and ungrouping zones directly from Homey.
-- Add an action to start a Roon radio stream.
-
 
 ## Version History
+
+### 1.1.0
+- New: Flow triggers when Roon Core paired or unpaired
+- New: Play Artist functionality in action card
+- New: Internet Radio functionality in action card
+- New: Auto radio capability
+- Change: Convenience switch capability renamed to speaker_wake and speaker_sleep
+- Added: Reconnection logic for transport driver
+- Fix: Cannot read properties of undefined (reading 'ping') causing driver to crash
 
 ### 1.0.8
 - Added: convenience switch capability

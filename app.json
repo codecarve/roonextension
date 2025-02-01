@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.codecarve.roonextension",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -24,7 +24,7 @@
   },
   "author": {
     "name": "CodeCarve",
-    "email": "help@codecarve.nl"
+    "email": "hello@codecarve.nl"
   },
   "contributors": {
     "developers": [
@@ -48,12 +48,114 @@
   },
   "homeyCommunityTopicId": 119818,
   "flow": {
+    "triggers": [
+      {
+        "title": {
+          "en": "Roon core paired",
+          "nl": "Roon core gekoppeld"
+        },
+        "hint": {
+          "en": "Roon core is paired",
+          "nl": "Roon core is gekoppeld"
+        },
+        "tokens": [
+          {
+            "name": "name",
+            "type": "string",
+            "title": {
+              "en": "Name",
+              "nl": "Naam"
+            },
+            "example": "ROCK"
+          },
+          {
+            "name": "ip",
+            "type": "string",
+            "title": {
+              "en": "IP Address",
+              "nl": "IP adres"
+            },
+            "example": "192.168.1.100"
+          },
+          {
+            "name": "port",
+            "type": "number",
+            "title": {
+              "en": "Port"
+            },
+            "example": 9330
+          }
+        ],
+        "id": "core_paired"
+      },
+      {
+        "title": {
+          "en": "Roon core unpaired",
+          "nl": "Roon core ontkoppeld"
+        },
+        "hint": {
+          "en": "Roon core is unpaired",
+          "nl": "Wanneer een Roon core is ontkoppeld"
+        },
+        "tokens": [
+          {
+            "name": "name",
+            "type": "string",
+            "title": {
+              "en": "Name",
+              "nl": "Naam"
+            },
+            "example": "ROCK"
+          },
+          {
+            "name": "ip",
+            "type": "string",
+            "title": {
+              "en": "IP Address",
+              "nl": "IP adres"
+            },
+            "example": "192.168.1.100"
+          },
+          {
+            "name": "port",
+            "type": "number",
+            "title": {
+              "en": "Port"
+            },
+            "example": 9330
+          }
+        ],
+        "id": "core_unpaired"
+      }
+    ],
     "actions": [
       {
-        "id": "convenience_switch_output",
+        "id": "speaker_sleep",
         "title": {
-          "en": "Wake-up",
+          "en": "Sleep",
+          "nl": "Zet uit"
+        },
+        "titleFormatted": {
+          "en": "Set output to sleep",
+          "nl": "Zet output uit"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=roon-output"
+          }
+        ]
+      },
+      {
+        "id": "speaker_wake_up",
+        "title": {
+          "en": "Wake up",
           "nl": "Zet aan"
+        },
+        "titleFormatted": {
+          "en": "Wake up output",
+          "nl": "Zet output aan"
         },
         "args": [
           {
@@ -90,6 +192,58 @@
         ]
       },
       {
+        "id": "artist_radio_output",
+        "title": {
+          "en": "Play Artist",
+          "nl": "Speel Artiest"
+        },
+        "titleFormatted": {
+          "en": "Play Artist [[artist]]",
+          "nl": "Speel Artiest [[artist]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=roon-output"
+          },
+          {
+            "name": "artist",
+            "type": "autocomplete",
+            "title": {
+              "en": "Artist",
+              "nl": "Artiest"
+            }
+          }
+        ]
+      },
+      {
+        "id": "internet_radio_output",
+        "title": {
+          "en": "Play Internet Radio",
+          "nl": "Speel Internet Radio"
+        },
+        "titleFormatted": {
+          "en": "Play Internet Radio [[internet_radio]]",
+          "nl": "Speel Internet Radio [[internet_radio]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=roon-output"
+          },
+          {
+            "name": "internet_radio",
+            "type": "autocomplete",
+            "title": {
+              "en": "Internet Radio",
+              "nl": "Internet Radio"
+            }
+          }
+        ]
+      },
+      {
         "id": "speaker_auto_radio_zone",
         "title": {
           "en": "Roon Radio",
@@ -120,8 +274,7 @@
   "drivers": [
     {
       "name": {
-        "en": "Output",
-        "nl": "Output"
+        "en": "Output"
       },
       "class": "speaker",
       "capabilities": [
@@ -142,7 +295,8 @@
         "volume_mute",
         "volume_set",
         "volume_soft_limit",
-        "convenience_switch",
+        "speaker_wake_up",
+        "speaker_sleep",
         "speaker_auto_radio"
       ],
       "platforms": [
@@ -222,18 +376,6 @@
     }
   ],
   "capabilities": {
-    "convenience_switch": {
-      "type": "boolean",
-      "title": {
-        "en": "Wake-up",
-        "nl": "Wake-up"
-      },
-      "getable": false,
-      "setable": true,
-      "uiComponent": "button",
-      "uiQuickAction": false,
-      "icon": "/assets/convenience_switch.svg"
-    },
     "speaker_auto_radio": {
       "type": "boolean",
       "title": {
@@ -242,7 +384,7 @@
       },
       "getable": true,
       "setable": true,
-      "uiComponent": "button",
+      "uiComponent": null,
       "uiQuickAction": false,
       "icon": "/assets/auto_radio.svg"
     },
@@ -275,6 +417,30 @@
       "step": 1,
       "decimals": 0,
       "icon": "/assets/queue_items_remaining.svg"
+    },
+    "speaker_sleep": {
+      "type": "boolean",
+      "title": {
+        "en": "Sleep",
+        "nl": "Slaapstand"
+      },
+      "getable": false,
+      "setable": true,
+      "uiComponent": null,
+      "uiQuickAction": false,
+      "icon": "/assets/sleep.svg"
+    },
+    "speaker_wake_up": {
+      "type": "boolean",
+      "title": {
+        "en": "Wake-up",
+        "nl": "Wekken"
+      },
+      "getable": false,
+      "setable": true,
+      "uiComponent": null,
+      "uiQuickAction": false,
+      "icon": "/assets/wake_up.svg"
     },
     "volume_soft_limit": {
       "type": "number",

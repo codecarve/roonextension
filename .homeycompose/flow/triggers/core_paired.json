@@ -1,0 +1,40 @@
+{
+  "title": {
+    "en": "Roon core paired",
+    "nl": "Roon core gekoppeld"
+  },
+  "hint": {
+    "en": "Roon core is paired",
+    "nl": "Roon core is gekoppeld"
+  },
+  "tokens": [
+    {
+      "name": "name",
+      "type": "string",
+      "title": {
+        "en": "Name",
+        "nl": "Naam"
+      },
+      "example": "ROCK"
+    },
+    {
+      "name": "ip",
+      "type": "string",
+      "title": {
+        "en": "IP Address",
+        "nl": "IP adres"
+      },
+      "example": "192.168.1.100"
+    },
+    {
+      "name": "port",
+      "type": "number",
+      "title": {
+        "en": "Port"
+      },
+      "example":9330
+    }
+  ]
+}
+
+

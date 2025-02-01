@@ -1,7 +1,6 @@
 {
   "name": {
-    "en": "Output",
-    "nl": "Output"
+    "en": "Output"
   },
   "class": "speaker",
   "capabilities": [
@@ -22,7 +21,8 @@
     "volume_mute",
     "volume_set",
     "volume_soft_limit",
-    "convenience_switch",
+    "speaker_wake_up",
+    "speaker_sleep",
     "speaker_auto_radio"
   ],
   "platforms": [

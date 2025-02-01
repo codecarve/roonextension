@@ -1,6 +1,6 @@
 {
   "id": "nl.codecarve.roonextension",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -23,7 +23,7 @@
   },
   "author": {
     "name": "CodeCarve",
-    "email": "help@codecarve.nl"
+    "email": "hello@codecarve.nl"
   },
   "contributors": {
     "developers": [
@@ -51,8 +51,9 @@
       },
       "class": "speaker",
       "capabilities": [
-        "convenience_switch",
-        "speaker_auto_radio"
+        "speaker_auto_radio",
+        "speaker_wake_up",
+        "speaker_sleep"
       ],
       "capabilitiesOptions": {
         "convenience_switch": {

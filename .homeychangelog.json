@@ -25,5 +25,8 @@
   },
   "1.0.8": {
     "en": "Add convenience switch capability"
+  },
+  "1.1.0": {
+    "en": "Play artist radio action"
   }
 }
