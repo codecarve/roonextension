@@ -81,6 +81,48 @@
           }
         }
       ]
+    },
+    {
+      "id": "playlist_output",
+      "title": {
+        "en": "Play Playlist",
+        "nl": "Speel Playlist"
+      },
+      "titleFormatted": {
+        "en": "Play Playlist [[playlist]]",
+        "nl": "Speel Playlist [[playlist]]"
+      },
+      "args": [
+        {
+          "name": "playlist",
+          "type": "autocomplete",
+          "title": {
+            "en": "Playlist",
+            "nl": "Playlist"
+          }
+        }
+      ]
+    },
+    {
+      "id": "genre_shuffle_output",
+      "title": {
+        "en": "Shuffle Genre",
+        "nl": "Shuffle Genre"
+      },
+      "titleFormatted": {
+        "en": "Shuffle Genre [[genre]]",
+        "nl": "Shuffle Genre [[genre]]"
+      },
+      "args": [
+        {
+          "name": "genre",
+          "type": "autocomplete",
+          "title": {
+            "en": "Genre",
+            "nl": "Genre"
+          }
+        }
+      ]
     }
   ]
 }

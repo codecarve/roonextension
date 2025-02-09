@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.codecarve.roonextension",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -239,6 +239,58 @@
             "title": {
               "en": "Internet Radio",
               "nl": "Internet Radio"
+            }
+          }
+        ]
+      },
+      {
+        "id": "playlist_output",
+        "title": {
+          "en": "Play Playlist",
+          "nl": "Speel Playlist"
+        },
+        "titleFormatted": {
+          "en": "Play Playlist [[playlist]]",
+          "nl": "Speel Playlist [[playlist]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=roon-output"
+          },
+          {
+            "name": "playlist",
+            "type": "autocomplete",
+            "title": {
+              "en": "Playlist",
+              "nl": "Playlist"
+            }
+          }
+        ]
+      },
+      {
+        "id": "genre_shuffle_output",
+        "title": {
+          "en": "Shuffle Genre",
+          "nl": "Shuffle Genre"
+        },
+        "titleFormatted": {
+          "en": "Shuffle Genre [[genre]]",
+          "nl": "Shuffle Genre [[genre]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=roon-output"
+          },
+          {
+            "name": "genre",
+            "type": "autocomplete",
+            "title": {
+              "en": "Genre",
+              "nl": "Genre"
             }
           }
         ]
