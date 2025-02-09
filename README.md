@@ -46,6 +46,9 @@ Zones can be grouped or ungrouped from Roon. In this case you need to create a n
 
 ## Version History
 
+### 1.1.1
+- New: incorporated latest driver from Roon Labs containing several fixes for stability and maintenance
+
 ### 1.1.0
 - New: Flow triggers when Roon Core paired or unpaired
 - New: Play Artist functionality in action card
