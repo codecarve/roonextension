@@ -31,55 +31,22 @@ class RoonZoneDevice extends Homey.Device {
     this._boundOnZonesSeekChanged = this.onZonesSeekChanged.bind(this);
     zoneManager.on("zonesSeekChanged", this._boundOnZonesSeekChanged);
 
-    this.registerCapabilityListener(
-      "speaker_playing",
-      this.onCapabilitySpeakerPlaying.bind(this),
-    );
+    const capabilityListeners = [
+      { cap: "speaker_playing", handler: this.onCapabilitySpeakerPlaying.bind(this) },
+      { cap: "speaker_shuffle", handler: this.onCapabilitySpeakerShuffle.bind(this) },
+      { cap: "speaker_repeat", handler: this.onCapabilitySpeakerRepeat.bind(this) },
+      { cap: "speaker_next", handler: this.onCapabilitySpeakerNext.bind(this) },
+      { cap: "speaker_prev", handler: this.onCapabilitySpeakerPrevious.bind(this) },
+      { cap: "speaker_position", handler: this.onCapabilitySpeakerPosition.bind(this) },
+      { cap: "volume_up", handler: this.onCapabilityVolumeUp.bind(this) },
+      { cap: "volume_down", handler: this.onCapabilityVolumeDown.bind(this) },
+      { cap: "volume_mute", handler: this.onCapabilityVolumeMute.bind(this) },
+      { cap: "speaker_auto_radio", handler: this.onCapabilityAutoRadio.bind(this) },
+    ]
 
-    this.registerCapabilityListener(
-      "speaker_shuffle",
-      this.onCapabilitySpeakerShuffle.bind(this),
-    );
-
-    this.registerCapabilityListener(
-      "speaker_repeat",
-      this.onCapabilitySpeakerRepeat.bind(this),
-    );
-
-    this.registerCapabilityListener(
-      "speaker_next",
-      this.onCapabilitySpeakerNext.bind(this),
-    );
-
-    this.registerCapabilityListener(
-      "speaker_prev",
-      this.onCapabilitySpeakerPrevious.bind(this),
-    );
-
-    this.registerCapabilityListener(
-      "speaker_position",
-      this.onCapabilitySpeakerPosition.bind(this),
-    );
-
-    this.registerCapabilityListener(
-      "volume_up",
-      this.onCapabilityVolumeUp.bind(this),
-    );
-
-    this.registerCapabilityListener(
-      "volume_down",
-      this.onCapabilityVolumeDown.bind(this),
-    );
-
-    this.registerCapabilityListener(
-      "volume_mute",
-      this.onCapabilityVolumeMute.bind(this),
-    );
-
-    this.registerCapabilityListener(
-      "speaker_auto_radio",
-      this.onCapabilityAutoRadio.bind(this),
-    );
+    capabilityListeners.forEach(({ cap, handler }) => {
+      this.registerCapabilityListener(cap, handler.bind(this));
+    });
 
     // now we want the state of the zone to be updated
     const transport = zoneManager.getTransport();
