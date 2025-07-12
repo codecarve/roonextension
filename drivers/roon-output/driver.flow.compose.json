@@ -47,8 +47,8 @@
         "nl": "Speel Artiest"
       },
       "titleFormatted": {
-        "en": "Play Artist [[artist]]",
-        "nl": "Speel Artiest [[artist]]"
+        "en": "Play Artist Radio [[artist]]",
+        "nl": "Speel Artiest Radio [[artist]]"
       },
       "args": [
         {

@@ -32,17 +32,17 @@ class RoonZoneDevice extends Homey.Device {
     zoneManager.on("zonesSeekChanged", this._boundOnZonesSeekChanged);
 
     const capabilityListeners = [
-      { cap: "speaker_playing", handler: this.onCapabilitySpeakerPlaying.bind(this) },
-      { cap: "speaker_shuffle", handler: this.onCapabilitySpeakerShuffle.bind(this) },
-      { cap: "speaker_repeat", handler: this.onCapabilitySpeakerRepeat.bind(this) },
-      { cap: "speaker_next", handler: this.onCapabilitySpeakerNext.bind(this) },
-      { cap: "speaker_prev", handler: this.onCapabilitySpeakerPrevious.bind(this) },
-      { cap: "speaker_position", handler: this.onCapabilitySpeakerPosition.bind(this) },
-      { cap: "volume_up", handler: this.onCapabilityVolumeUp.bind(this) },
-      { cap: "volume_down", handler: this.onCapabilityVolumeDown.bind(this) },
-      { cap: "volume_mute", handler: this.onCapabilityVolumeMute.bind(this) },
-      { cap: "speaker_auto_radio", handler: this.onCapabilityAutoRadio.bind(this) },
-    ]
+      { cap: "speaker_playing", handler: this.onCapabilitySpeakerPlaying },
+      { cap: "speaker_shuffle", handler: this.onCapabilitySpeakerShuffle },
+      { cap: "speaker_repeat", handler: this.onCapabilitySpeakerRepeat },
+      { cap: "speaker_next", handler: this.onCapabilitySpeakerNext },
+      { cap: "speaker_prev", handler: this.onCapabilitySpeakerPrevious },
+      { cap: "speaker_position", handler: this.onCapabilitySpeakerPosition },
+      { cap: "volume_up", handler: this.onCapabilityVolumeUp },
+      { cap: "volume_down", handler: this.onCapabilityVolumeDown },
+      { cap: "volume_mute", handler: this.onCapabilityVolumeMute },
+      { cap: "speaker_auto_radio", handler: this.onCapabilityAutoRadio },
+    ];
 
     capabilityListeners.forEach(({ cap, handler }) => {
       this.registerCapabilityListener(cap, handler.bind(this));

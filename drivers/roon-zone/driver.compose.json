@@ -21,12 +21,8 @@
     "volume_mute",
     "speaker_auto_radio"
   ],
-  "platforms": [
-    "local"
-  ],
-  "connectivity": [
-    "lan"
-  ],
+  "platforms": ["local"],
+  "connectivity": ["lan"],
   "images": {
     "small": "{{driverAssetsPath}}/images/small.png",
     "large": "{{driverAssetsPath}}/images/large.png",
