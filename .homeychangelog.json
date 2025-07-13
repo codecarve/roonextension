@@ -40,5 +40,9 @@
   "1.1.3": {
     "en": "✨ **Improvements** ✨\n• Improved Play Artist Radio flow action with better error handling\n• Refactored artist browsing logic to use new browser utilities\n• Enhanced capability listener registration for better maintainability\n\n✨ **Fixes** ✨\n• Fixed code style inconsistencies across driver files\n• Improved async/await error handling in device implementations\n\n**Thank you for your support!**",
     "nl": "✨ **Verbeteringen** ✨\n• Verbeterde Play Artist Radio flow actie met betere foutafhandeling\n• Gerefactorde artiest browse logica om nieuwe browser utilities te gebruiken\n• Verbeterde capability listener registratie voor betere onderhoudbaarheid\n\n✨ **Fixes** ✨\n• Code stijl inconsistenties in driver bestanden opgelost\n• Verbeterde async/await foutafhandeling in device implementaties\n\n**Bedankt voor uw steun!**"
+  },
+  "1.1.4": {
+    "en": "✨ **Bug Fix** ✨\n• Fixed issue where flow actions would target wrong output when multiple outputs are in the same Roon zone\n• Playlist, artist radio, internet radio, and genre shuffle actions now correctly target the intended output device\n\n**Thank you for your support!**",
+    "nl": "✨ **Bug Fix** ✨\n• Probleem opgelost waarbij flow acties de verkeerde output zouden targeten wanneer meerdere outputs in dezelfde Roon zone staan\n• Playlist, artiest radio, internet radio, en genre shuffle acties targeten nu correct het bedoelde output apparaat\n\n**Bedankt voor uw steun!**"
   }
 }

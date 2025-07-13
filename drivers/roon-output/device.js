@@ -776,7 +776,7 @@ class RoonOutputDevice extends Homey.Device {
       await browseZoneOrOutput(
         browse,
         "artists",
-        this.zone.zone_id,
+        this.getData().id,
         startRadioItem.item_key,
       );
     } catch (error) {
@@ -891,7 +891,7 @@ class RoonOutputDevice extends Homey.Device {
     browse.browse(
       {
         hierarchy: "internet_radio",
-        zone_or_output_id: this.zone.zone_id,
+        zone_or_output_id: this.getData().id,
         item_key: internetRadioItem.item_key,
       },
       (error5, body5) => {
@@ -1160,7 +1160,7 @@ class RoonOutputDevice extends Homey.Device {
                     browse.browse(
                       {
                         hierarchy: "playlists",
-                        zone_or_output_id: this.zone.zone_id,
+                        zone_or_output_id: this.getData().id,
                         item_key: startPlaylistItem.item_key,
                       },
                       (error5, body5) => {
@@ -1414,7 +1414,7 @@ class RoonOutputDevice extends Homey.Device {
                     browse.browse(
                       {
                         hierarchy: "genres",
-                        zone_or_output_id: this.zone.zone_id,
+                        zone_or_output_id: this.getData().id,
                         item_key: startGenreItem.item_key,
                       },
                       (error5, body5) => {
