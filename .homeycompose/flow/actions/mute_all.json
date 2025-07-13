@@ -1,0 +1,14 @@
+{
+  "title": {
+    "en": "Mute All Zones",
+    "nl": "Demp alle zones"
+  },
+  "titleFormatted": {
+    "en": "Mute all zones at once",
+    "nl": "Demp alle zones tegelijk"
+  },
+  "hint": {
+    "en": "Mutes all audio outputs across all zones for emergency silence.",
+    "nl": "Dempt alle audio-uitgangen in alle zones voor emergency silence."
+  }
+}

@@ -118,6 +118,116 @@ class RoonApp extends Homey.App {
     this.roonApi.start_discovery();
 
     svc_status.set_status("All is good", false);
+
+    this.registerFlowActions();
+  }
+
+  registerFlowActions() {
+    const muteAllAction = this.homey.flow.getActionCard("mute_all");
+    muteAllAction.registerRunListener(async (args, state) => {
+      return this.muteAllZones();
+    });
+
+    const pauseAllAction = this.homey.flow.getActionCard("pause_all");
+    pauseAllAction.registerRunListener(async (args, state) => {
+      return this.pauseAllZones();
+    });
+  }
+
+  async muteAllZones() {
+    if (!this.transport) {
+      throw new Error("Roon core not connected");
+    }
+
+    // Add small delay to allow any pending operations to settle
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    const zones = Object.values(zoneManager.zones);
+    const mutePromises = [];
+
+    for (const zone of zones) {
+      for (const output of zone.outputs || []) {
+        // Always attempt to mute if output has volume control - don't check is_muted state to avoid race conditions
+        if (output.volume) {
+          mutePromises.push(
+            new Promise((resolve, reject) => {
+              this.transport.mute(output.output_id, "mute", (err) => {
+                if (err) {
+                  this.error(
+                    `Failed to mute output ${output.display_name || output.output_id}:`,
+                    err,
+                  );
+                  reject(
+                    new Error(`Failed to mute output ${output.output_id}`),
+                  );
+                } else {
+                  this.log(
+                    `Muted output: ${output.display_name || output.output_id}`,
+                  );
+                  resolve();
+                }
+              });
+            }),
+          );
+        }
+      }
+    }
+
+    if (mutePromises.length === 0) {
+      this.log("No outputs with volume control found to mute");
+      return true;
+    }
+
+    try {
+      const results = await Promise.allSettled(mutePromises);
+      const successful = results.filter((r) => r.status === "fulfilled").length;
+      const failed = results.filter((r) => r.status === "rejected").length;
+
+      this.log(
+        `Mute all completed: ${successful} successful, ${failed} failed`,
+      );
+      return true;
+    } catch (error) {
+      this.error("Error in mute all operation:", error);
+      return true; // Don't throw to avoid flow failure
+    }
+  }
+
+  async pauseAllZones() {
+    if (!this.transport) {
+      throw new Error("Roon core not connected");
+    }
+
+    // Add small delay to allow any pending operations to settle
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    const zones = Object.values(zoneManager.zones);
+    let pausedCount = 0;
+    let errorCount = 0;
+
+    for (const zone of zones) {
+      if (zone.state === "playing") {
+        try {
+          this.transport.control(zone.zone_id, "pause");
+          pausedCount++;
+          this.log(`Paused zone: ${zone.display_name || zone.zone_id}`);
+        } catch (error) {
+          errorCount++;
+          this.error(
+            `Failed to pause zone ${zone.display_name || zone.zone_id}:`,
+            error,
+          );
+        }
+      }
+    }
+
+    if (pausedCount === 0 && errorCount === 0) {
+      this.log("No zones to pause");
+      return true;
+    }
+
+    this.log(`Paused ${pausedCount} zones, ${errorCount} errors`);
+    return true;
   }
 }
 

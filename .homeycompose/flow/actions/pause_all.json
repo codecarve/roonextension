@@ -1,0 +1,14 @@
+{
+  "title": {
+    "en": "Pause All Zones",
+    "nl": "Pauzeer alle zones"
+  },
+  "titleFormatted": {
+    "en": "Pause all zones simultaneously",
+    "nl": "Pauzeer alle zones tegelijkertijd"
+  },
+  "hint": {
+    "en": "Pauses playback in all currently playing zones simultaneously.",
+    "nl": "Pauzeert het afspelen in alle momenteel spelende zones tegelijkertijd."
+  }
+}

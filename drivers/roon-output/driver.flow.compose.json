@@ -4,7 +4,7 @@
       "id": "speaker_sleep",
       "title": {
         "en": "Sleep",
-        "nl": "Zet uit"
+        "nl": "Zet Uit"
       },
       "titleFormatted": {
         "en": "Set output to sleep",
@@ -14,8 +14,8 @@
     {
       "id": "speaker_wake_up",
       "title": {
-        "en": "Wake up",
-        "nl": "Zet aan"
+        "en": "Wake Up",
+        "nl": "Zet Aan"
       },
       "titleFormatted": {
         "en": "Wake up output",
