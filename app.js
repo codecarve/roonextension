@@ -29,7 +29,7 @@ class RoonApp extends Homey.App {
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.1.7",
+      display_version: "1.1.8",
       publisher: "CodeCarve",
       email: "help@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
@@ -259,21 +259,148 @@ class RoonApp extends Homey.App {
 
     this.log(`Target: ${targetType} ${targetId}`);
 
-    // Simplified approach: Use control command instead of complex queue handling
-    // This is more reliable as control() is synchronous and doesn't depend on callbacks
-    try {
-      this.log("Using simple control command for queue playback");
-      this.transport.control(targetId, "play");
+    return new Promise((resolve, reject) => {
+      let unsubscribeQueue = null;
+      let isResolved = false;
 
-      // Add a small delay to let the command process
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Overall timeout to prevent hanging
+      const overallTimeout = setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true;
+          if (unsubscribeQueue && typeof unsubscribeQueue === "function") {
+            try {
+              unsubscribeQueue();
+            } catch (error) {
+              this.error("Error unsubscribing during timeout:", error);
+            }
+          }
+          // made this log instead of error
+          this.log("Play queue operation timed out after 10 seconds");
+          resolve();
+          //reject(new Error("Play queue operation timeout"));
+        }
+      }, 10000);
 
-      this.log("Play queue command completed successfully");
-      return true;
-    } catch (error) {
-      this.error("Failed to play queue:", error);
-      throw new Error(`Failed to play queue: ${error.message}`);
-    }
+      const cleanup = () => {
+        clearTimeout(overallTimeout);
+        if (unsubscribeQueue && typeof unsubscribeQueue === "function") {
+          try {
+            unsubscribeQueue();
+            unsubscribeQueue = null;
+          } catch (error) {
+            this.error("Error during cleanup:", error);
+          }
+        }
+      };
+
+      try {
+        this.log("Subscribing to queue for target:", targetId);
+
+        unsubscribeQueue = this.transport.subscribe_queue(
+          targetId,
+          10,
+          (response, data) => {
+            this.log("=== QUEUE SUBSCRIPTION CALLBACK ===");
+            this.log("Response:", response);
+            this.log("Data:", data ? JSON.stringify(data, null, 2) : "null");
+
+            if (response === "Subscribed") {
+              // Clean up subscription immediately after getting data
+              cleanup();
+
+              if (data && data.items && data.items.length > 0) {
+                const firstItem = data.items[0];
+                this.log("Queue has", data.items.length, "items");
+                this.log("First item queue_item_id:", firstItem.queue_item_id);
+
+                // Now use play_from_here with the first queue item
+                let playResolved = false;
+                const playTimeout = setTimeout(() => {
+                  if (!playResolved && !isResolved) {
+                    isResolved = true;
+                    this.error("play_from_here timed out after 10 seconds");
+                    reject(
+                      new Error(
+                        "Play from queue timeout - no response from play_from_here",
+                      ),
+                    );
+                  }
+                }, 10000);
+
+                this.log(
+                  "Calling play_from_here with targetId:",
+                  targetId,
+                  "queue_item_id:",
+                  firstItem.queue_item_id,
+                );
+
+                this.transport.play_from_here(
+                  targetId,
+                  firstItem.queue_item_id,
+                  (msg, body) => {
+                    clearTimeout(playTimeout);
+                    playResolved = true;
+
+                    this.log("=== PLAY_FROM_HERE CALLBACK ===");
+                    this.log("Message:", msg);
+                    this.log(
+                      "Body:",
+                      body ? JSON.stringify(body, null, 2) : "null",
+                    );
+
+                    if (!isResolved) {
+                      isResolved = true;
+                      if (msg === "Success") {
+                        this.log(
+                          "Successfully started queue playback from item:",
+                          firstItem.queue_item_id,
+                        );
+                        resolve(true);
+                      } else {
+                        this.error("play_from_here failed:", msg, body);
+                        reject(new Error(`Failed to play from queue: ${msg}`));
+                      }
+                    }
+                  },
+                );
+              } else {
+                // Empty queue - fall back to simple play
+                this.log("Queue is empty, using fallback play command");
+                if (!isResolved) {
+                  isResolved = true;
+                  try {
+                    this.transport.control(targetId, "play");
+                    setTimeout(() => {
+                      this.log("Fallback play command sent");
+                      resolve(true);
+                    }, 500);
+                  } catch (error) {
+                    this.error("Fallback play failed:", error);
+                    reject(new Error(`Failed to play: ${error.message}`));
+                  }
+                }
+              }
+            } else {
+              cleanup();
+              if (!isResolved) {
+                isResolved = true;
+                this.error("Failed to subscribe to queue, response:", response);
+                reject(new Error(`Queue subscription failed: ${response}`));
+              }
+            }
+          },
+        );
+
+        this.log("Queue subscription initiated, waiting for callback...");
+      } catch (error) {
+        cleanup();
+        if (!isResolved) {
+          isResolved = true;
+          this.error("Error subscribing to queue:", error);
+          reject(new Error(`Failed to subscribe to queue: ${error.message}`));
+        }
+      }
+    });
   }
 }
 
