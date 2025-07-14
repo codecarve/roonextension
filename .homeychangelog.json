@@ -30,7 +30,7 @@
     "en": "✨ **New features** ✨\n• Play artist, internet radio, playlist and genre support from flows\n• Global audio controls: Mute All Zones and Pause All Zones for emergency situations and bedtime routines\n• Enhanced flow actions with better error handling and targeting accuracy\n\n✨ **Fixes** ✨\n• Fix for crash when retrying to connect to Roon\n• Fix for zones not updating when zones are added, removed, or changed\n• Fixed issue where flow actions would target wrong output in multi-output zones\n• Improved code stability\n\n**Thank you for your support!**",
     "nl": "✨ **Nieuw** ✨\n• Ondersteuning voor afspelen van artiest, internet radio, playlist en genre vanuit flows\n• Globale audio controls: Demp Alle Zones en Pauzeer Alle Zones voor noodsituaties en bedtijdroutines\n• Verbeterde flow acties\n\n✨ **Fixes** ✨\n• Oplossing voor crash bij verbinding met Roon\n• Oplossing voor zones die niet bijwerken wanneer zones worden toegevoegd, verwijderd of gewijzigd\n• Probleem opgelost waarbij flow acties de verkeerde output targeten in multi-output zones\n• Verbeterde code stabiliteit\n\n**Bedankt voor uw steun!**"
   },
-  "1.1.6": {
+  "1.1.7": {
     "en": "🎵 **New Play Queue Action** 🎵\n• Resume playback from your current queue position\n• Perfect for returning to your music after playing something else\n• Works with both zones and individual outputs\n\n**Thank you for your continued support!**",
     "nl": "🎵 **Nieuwe Speel Wachtrij Actie** 🎵\n• Hervat afspelen vanuit je huidige wachtrij positie\n• Perfect om terug te keren naar je muziek na het afspelen van iets anders\n• Werkt met zowel zones als individuele outputs\n\n**Bedankt voor uw steun!**"
   }
