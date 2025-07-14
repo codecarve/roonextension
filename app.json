@@ -160,6 +160,28 @@
         "id": "pause_all"
       },
       {
+        "title": {
+          "en": "Play Queue",
+          "nl": "Speel Wachtrij"
+        },
+        "titleFormatted": {
+          "en": "Resume playback from the queue",
+          "nl": "Hervat afspelen vanuit de wachtrij"
+        },
+        "hint": {
+          "en": "Resumes playback from the current queue position, useful after playing another playlist.",
+          "nl": "Hervat afspelen vanuit de huidige wachtrij positie, handig na het afspelen van een andere playlist."
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=roon-output|roon-zone"
+          }
+        ],
+        "id": "play_queue"
+      },
+      {
         "id": "speaker_sleep",
         "title": {
           "en": "Sleep",

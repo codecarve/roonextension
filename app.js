@@ -29,7 +29,7 @@ class RoonApp extends Homey.App {
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.1.5",
+      display_version: "1.1.6",
       publisher: "CodeCarve",
       email: "help@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
@@ -132,6 +132,11 @@ class RoonApp extends Homey.App {
     pauseAllAction.registerRunListener(async (args, state) => {
       return this.pauseAllZones();
     });
+
+    const playQueueAction = this.homey.flow.getActionCard("play_queue");
+    playQueueAction.registerRunListener(async (args, state) => {
+      return this.playQueue(args.device);
+    });
   }
 
   async muteAllZones() {
@@ -228,6 +233,139 @@ class RoonApp extends Homey.App {
 
     this.log(`Paused ${pausedCount} zones, ${errorCount} errors`);
     return true;
+  }
+
+  async playQueue(device) {
+    this.log("=== Play Queue Action Started ===");
+    this.log("Device:", device.getName());
+
+    if (!this.transport) {
+      throw new Error("Roon core not connected");
+    }
+
+    const deviceData = device.getData();
+    let zoneId;
+
+    if (device.driver.id === "roon-zone") {
+      zoneId = deviceData.id;
+    } else if (device.driver.id === "roon-output") {
+      const outputId = deviceData.id;
+      const allZones = Object.values(zoneManager.zones);
+      const zoneWithOutput = allZones.find(
+        (zone) =>
+          zone.outputs &&
+          zone.outputs.some((output) => output.output_id === outputId),
+      );
+
+      if (zoneWithOutput) {
+        zoneId = zoneWithOutput.zone_id;
+      } else {
+        throw new Error("No zone found containing this output");
+      }
+    } else {
+      throw new Error(`Unknown driver type: ${device.driver.id}`);
+    }
+
+    return new Promise((resolve, reject) => {
+      this.log("Getting queue for zone:", zoneId);
+      this.log("Transport available:", !!this.transport);
+
+      let unsubscribeQueue = null;
+
+      // Add timeout to prevent hanging
+      const timeout = setTimeout(() => {
+        if (unsubscribeQueue && typeof unsubscribeQueue === 'function') {
+          try {
+            unsubscribeQueue();
+          } catch (error) {
+            this.error("Error unsubscribing from queue:", error);
+          }
+        }
+        this.error("Queue subscription timed out after 10 seconds");
+        reject(new Error("Queue subscription timeout"));
+      }, 10000);
+
+      try {
+        unsubscribeQueue = this.transport.subscribe_queue(zoneId, 10, (response, data) => {
+          clearTimeout(timeout);
+          
+          // Safely unsubscribe after getting the data
+          if (unsubscribeQueue && typeof unsubscribeQueue === 'function') {
+            try {
+              unsubscribeQueue();
+              unsubscribeQueue = null;
+            } catch (error) {
+              this.error("Error unsubscribing from queue:", error);
+            }
+          }
+
+        this.log("=== QUEUE SUBSCRIPTION CALLBACK ===");
+        this.log("Response:", response);
+        this.log("Data:", data ? JSON.stringify(data, null, 2) : "null");
+
+        if (
+          response === "Subscribed" &&
+          data &&
+          data.items &&
+          data.items.length > 0
+        ) {
+          const firstItem = data.items[0];
+          this.log("Queue has", data.items.length, "items");
+          this.log("First item:", JSON.stringify(firstItem, null, 2));
+          this.log("Playing from queue item:", firstItem.queue_item_id);
+
+          // Add timeout for play_from_here operation
+          const playTimeout = setTimeout(() => {
+            this.error("play_from_here timed out after 5 seconds");
+            reject(new Error("Play from queue timeout"));
+          }, 5000);
+
+          this.transport.play_from_here(
+            zoneId,
+            firstItem.queue_item_id,
+            (msg, body) => {
+              clearTimeout(playTimeout);
+              this.log("=== PLAY_FROM_HERE CALLBACK ===");
+              this.log("Message:", msg);
+              this.log("Body:", body ? JSON.stringify(body, null, 2) : "null");
+              if (msg === "Success") {
+                this.log("Successfully started queue playback");
+                resolve();
+              } else {
+                this.error("play_from_here failed:", msg, body);
+                reject(new Error(`Failed to play from queue: ${msg}`));
+              }
+            },
+          );
+        } else if (response === "Subscribed") {
+          this.log("Queue appears empty or malformed, data:", data);
+          this.log("Using simple play command instead");
+          
+          // Promisify the control command for empty queue
+          try {
+            this.transport.control(zoneId, "play");
+            // Add small delay to allow the command to process
+            setTimeout(() => {
+              this.log("Simple play command sent for empty queue");
+              resolve();
+            }, 100);
+          } catch (error) {
+            this.error("Failed to send play command:", error);
+            reject(new Error(`Failed to play: ${error.message}`));
+          }
+        } else {
+          this.error("Failed to subscribe to queue, response:", response);
+          reject(new Error(`Queue subscription failed: ${response}`));
+        }
+        });
+
+        this.log("subscribe_queue call made, waiting for callback...");
+      } catch (error) {
+        clearTimeout(timeout);
+        this.error("Error subscribing to queue:", error);
+        reject(new Error(`Failed to subscribe to queue: ${error.message}`));
+      }
+    });
   }
 }
 
