@@ -1,7 +1,8 @@
 {
   "type": "number",
   "title": {
-    "en": "Volume soft limit"
+    "en": "Volume soft limit",
+    "nl": "Volume soft limiet"
   },
   "getable": true,
   "setable": false,

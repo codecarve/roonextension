@@ -29,7 +29,7 @@ class RoonApp extends Homey.App {
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.1.9",
+      display_version: "1.1.10",
       publisher: "CodeCarve",
       email: "help@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
@@ -120,6 +120,7 @@ class RoonApp extends Homey.App {
     svc_status.set_status("All is good", false);
 
     this.registerFlowActions();
+    this.registerFlowConditions();
   }
 
   registerFlowActions() {
@@ -137,6 +138,14 @@ class RoonApp extends Homey.App {
     playQueueAction.registerRunListener(async (args, state) => {
       return this.playQueue(args.device);
     });
+  }
+
+  registerFlowConditions() {
+    this.homey.flow
+      .getConditionCard("core_is_paired")
+      .registerRunListener(async (args, state) => {
+        return this.core !== null;
+      });
   }
 
   async muteAllZones() {

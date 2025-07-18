@@ -1,7 +1,8 @@
 {
   "type": "number",
   "title": {
-    "en": "Queue time remaining"
+    "en": "Queue time remaining",
+    "nl": "Queue tijd resterend"
   },
   "getable": true,
   "setable": false,

@@ -799,7 +799,10 @@ class RoonOutputDevice extends Homey.Device {
       return;
     }
 
-    const internet_radios = await browseAndLoadAllHierarchy(browse, "internet_radio");
+    const internet_radios = await browseAndLoadAllHierarchy(
+      browse,
+      "internet_radio",
+    );
 
     console.log("internet_radios: ", internet_radios);
 
@@ -872,7 +875,10 @@ class RoonOutputDevice extends Homey.Device {
     }
 
     // we cannot trust this number so let's just search again for the artist
-    const internetRadios = await browseAndLoadAllHierarchy(browse, "internet_radio");
+    const internetRadios = await browseAndLoadAllHierarchy(
+      browse,
+      "internet_radio",
+    );
 
     console.log("internetRadios: ", JSON.stringify(internetRadios, null, 2));
 

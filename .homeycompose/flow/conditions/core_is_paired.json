@@ -1,0 +1,10 @@
+{
+  "title": {
+    "en": "Core !{{is|isn't}} connected",
+    "nl": "Core !{{is|is niet}} verbonden"
+  },
+  "titleFormatted": {
+    "en": "[[device]] !{{is|isn't}} connected",
+    "nl": "[[device]] !{{is|is niet}} verbonden"
+  }
+}
