@@ -5,3 +5,5 @@
 .idea/
 .claude/
 .cursor/
+*.local.md
+*.local.json

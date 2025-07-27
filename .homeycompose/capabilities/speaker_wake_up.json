@@ -1,6 +1,12 @@
 {
   "type": "boolean",
-  "title": { "en": "Wake-up", "nl": "Wekken" },
+  "title": {
+    "en": "Wake-up",
+    "nl": "Wekken",
+    "es": "Activar",
+    "fr": "Réveiller",
+    "de": "Aktivieren"
+  },
   "getable": false,
   "setable": true,
   "uiComponent": null,

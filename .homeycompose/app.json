@@ -1,14 +1,22 @@
 {
   "id": "nl.codecarve.roonextension",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": ["local"],
   "name": {
-    "en": "Roon"
+    "en": "Roon",
+    "nl": "Roon",
+    "es": "Roon",
+    "fr": "Roon",
+    "de": "Roon"
   },
   "description": {
-    "en": "Rediscover your music across every room"
+    "en": "Rediscover your music across every room",
+    "nl": "Herontdek je muziek in elke kamer",
+    "es": "Redescubre tu música en cada habitación",
+    "fr": "Redécouvrez votre musique dans chaque pièce",
+    "de": "Entdecken Sie Ihre Musik in jedem Raum neu"
   },
   "category": ["music"],
   "permissions": [],
@@ -33,82 +41,58 @@
     {
       "id": "roon-zone",
       "name": {
-        "en": "Roon Zone Device"
+        "en": "Roon Zone Device",
+        "nl": "Roon Zone Apparaat",
+        "es": "Dispositivo de Zona Roon",
+        "fr": "Appareil de Zone Roon",
+        "de": "Roon Zonen-Gerät"
       },
       "class": "speaker",
-      "capabilities": ["speaker_auto_radio"]
+      "capabilities": [
+        "speaker_playing",
+        "speaker_next",
+        "speaker_prev",
+        "speaker_shuffle",
+        "speaker_repeat",
+        "speaker_position",
+        "volume_up",
+        "volume_down",
+        "volume_mute",
+        "speaker_auto_radio",
+        "speaker_queue_items_remaining",
+        "speaker_queue_time_remaining"
+      ]
     },
     {
       "id": "roon-output",
       "name": {
-        "en": "Roon Output Device"
+        "en": "Roon Output Device",
+        "nl": "Roon Output Apparaat",
+        "es": "Dispositivo de Salida Roon",
+        "fr": "Appareil de Sortie Roon",
+        "de": "Roon Ausgabe-Gerät"
       },
       "class": "speaker",
       "capabilities": [
+        "speaker_playing",
+        "speaker_next",
+        "speaker_prev",
+        "speaker_shuffle",
+        "speaker_repeat",
+        "speaker_position",
+        "volume_up",
+        "volume_down",
+        "volume_mute",
+        "volume_set",
         "speaker_auto_radio",
         "speaker_wake_up",
-        "speaker_sleep"
+        "speaker_sleep",
+        "speaker_queue_items_remaining",
+        "speaker_queue_time_remaining",
+        "volume_soft_limit"
       ],
-      "capabilitiesOptions": {
-        "convenience_switch": {
-          "title": {
-            "en": "Convenience Switch",
-            "nl": "Convenience Switch"
-          },
-          "type": "boolean",
-          "set": true,
-          "get": false
-        }
-      },
-      "flow": {
-        "actions": [
-          {
-            "id": "convenience_switch",
-            "title": {
-              "en": "Wake-up Output",
-              "nl": "Wake-up Output"
-            },
-            "hint": {
-              "en": "The output that should be woken up.",
-              "nl": "The output that should be woken up."
-            },
-            "args": [
-              {
-                "name": "device",
-                "type": "device",
-                "filter": "driver_id=roon-output"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "roon-core",
-      "name": {
-        "en": "Roon Core",
-        "nl": "Roon Core"
-      },
-      "class": "speaker",
-      "capabilities": [
-        "core_connected",
-        "core_name",
-        "core_ip",
-        "core_port"
-      ],
-      "capabilitiesOptions": {
-        "core_connected": {
-          "title": {
-            "en": "Core Connected",
-            "nl": "Core Verbonden"
-          },
-          "insightsTitleInverted": {
-            "en": "Core Disconnected",
-            "nl": "Core Losgekoppeld"
-          },
-          "invertIcon": true
-        }
-      }
+      "capabilitiesOptions": {},
+      "flow": {}
     }
   ],
   "source": "https://github.com/codecarve/roonextension",

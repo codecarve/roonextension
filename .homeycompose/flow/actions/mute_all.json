@@ -1,14 +1,23 @@
 {
   "title": {
     "en": "Mute All Zones",
-    "nl": "Demp alle zones"
+    "nl": "Demp alle zones",
+    "es": "Silenciar Todas las Zonas",
+    "fr": "Couper Toutes les Zones",
+    "de": "Alle Zonen Stumm Schalten"
   },
   "titleFormatted": {
     "en": "Mute all zones at once",
-    "nl": "Demp alle zones tegelijk"
+    "nl": "Demp alle zones tegelijk",
+    "es": "Silenciar todas las zonas a la vez",
+    "fr": "Couper toutes les zones en une fois",
+    "de": "Alle Zonen auf einmal stumm schalten"
   },
   "hint": {
     "en": "Mutes all audio outputs across all zones for emergency silence.",
-    "nl": "Dempt alle audio-uitgangen in alle zones voor emergency silence."
+    "nl": "Dempt alle audio-uitgangen in alle zones voor emergency silence.",
+    "es": "Silencia todas las salidas de audio en todas las zonas para silencio de emergencia.",
+    "fr": "Coupe toutes les sorties audio dans toutes les zones pour un silence d'urgence.",
+    "de": "Schaltet alle Audio-Ausgänge in allen Zonen für Notfall-Stille stumm."
   }
 }

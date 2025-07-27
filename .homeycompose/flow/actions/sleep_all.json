@@ -1,0 +1,23 @@
+{
+  "title": {
+    "en": "Turn Off All Outputs",
+    "nl": "Schakel Alle Uitgangen Uit",
+    "es": "Apagar Todas las Salidas",
+    "fr": "Éteindre Toutes les Sorties",
+    "de": "Alle Ausgänge Ausschalten"
+  },
+  "titleFormatted": {
+    "en": "Turn off all outputs one by one",
+    "nl": "Schakel alle uitgangen één voor één uit",
+    "es": "Apagar todas las salidas una por una",
+    "fr": "Éteindre toutes les sorties une par une",
+    "de": "Alle Ausgänge nacheinander ausschalten"
+  },
+  "hint": {
+    "en": "Puts all audio outputs into standby mode one by one. This will turn off all connected devices that support standby.",
+    "nl": "Zet alle audio-uitgangen één voor één in stand-by modus. Dit schakelt alle aangesloten apparaten uit die stand-by ondersteunen.",
+    "es": "Pone todas las salidas de audio en modo de espera una por una. Esto apagará todos los dispositivos conectados que admitan modo de espera.",
+    "fr": "Met toutes les sorties audio en mode veille une par une. Cela éteindra tous les appareils connectés qui prennent en charge la veille.",
+    "de": "Versetzt alle Audio-Ausgänge nacheinander in den Standby-Modus. Dies schaltet alle angeschlossenen Geräte aus, die Standby unterstützen."
+  }
+}

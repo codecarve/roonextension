@@ -1,15 +1,24 @@
 {
   "title": {
     "en": "Play Queue",
-    "nl": "Speel Wachtrij"
+    "nl": "Speel Wachtrij",
+    "es": "Reproducir Cola",
+    "fr": "Lire la File d'Attente",
+    "de": "Warteschlange Abspielen"
   },
   "titleFormatted": {
     "en": "Resume playback from the queue",
-    "nl": "Hervat afspelen vanuit de wachtrij"
+    "nl": "Hervat afspelen vanuit de wachtrij",
+    "es": "Reanudar reproducción desde la cola",
+    "fr": "Reprendre la lecture depuis la file d'attente",
+    "de": "Wiedergabe aus der Warteschlange fortsetzen"
   },
   "hint": {
     "en": "Resumes playback from the current queue position, useful after playing another playlist.",
-    "nl": "Hervat afspelen vanuit de huidige wachtrij positie, handig na het afspelen van een andere playlist."
+    "nl": "Hervat afspelen vanuit de huidige wachtrij positie, handig na het afspelen van een andere playlist.",
+    "es": "Reanuda la reproducción desde la posición actual de la cola, útil después de reproducir otra lista de reproducción.",
+    "fr": "Reprend la lecture depuis la position actuelle de la file d'attente, utile après avoir joué une autre liste de lecture.",
+    "de": "Setzt die Wiedergabe von der aktuellen Warteschlangen-Position fort, nützlich nach dem Abspielen einer anderen Playlist."
   },
   "args": [
     {

@@ -1,10 +1,16 @@
 {
   "title": {
     "en": "Core !{{is|isn't}} connected",
-    "nl": "Core !{{is|is niet}} verbonden"
+    "nl": "Core !{{is|is niet}} verbonden",
+    "es": "Core !{{está|no está}} conectado",
+    "fr": "Core !{{est|n'est pas}} connecté",
+    "de": "Core !{{ist|ist nicht}} verbunden"
   },
   "titleFormatted": {
     "en": "[[device]] !{{is|isn't}} connected",
-    "nl": "[[device]] !{{is|is niet}} verbonden"
+    "nl": "[[device]] !{{is|is niet}} verbonden",
+    "es": "[[device]] !{{está|no está}} conectado",
+    "fr": "[[device]] !{{est|n'est pas}} connecté",
+    "de": "[[device]] !{{ist|ist nicht}} verbunden"
   }
 }

@@ -1,11 +1,17 @@
 {
   "title": {
     "en": "Roon core unpaired",
-    "nl": "Roon core ontkoppeld"
+    "nl": "Roon core ontkoppeld",
+    "es": "Roon core desemparejado",
+    "fr": "Roon core désappairé",
+    "de": "Roon Core getrennt"
   },
   "hint": {
     "en": "Roon core is unpaired",
-    "nl": "Wanneer een Roon core is ontkoppeld"
+    "nl": "Wanneer een Roon core is ontkoppeld",
+    "es": "Roon core está desemparejado",
+    "fr": "Roon core est désappairé",
+    "de": "Roon Core ist getrennt"
   },
   "tokens": [
     {
@@ -13,7 +19,10 @@
       "type": "string",
       "title": {
         "en": "Name",
-        "nl": "Naam"
+        "nl": "Naam",
+        "es": "Nombre",
+        "fr": "Nom",
+        "de": "Name"
       },
       "example": "ROCK"
     },
@@ -22,7 +31,10 @@
       "type": "string",
       "title": {
         "en": "IP Address",
-        "nl": "IP adres"
+        "nl": "IP adres",
+        "es": "Dirección IP",
+        "fr": "Adresse IP",
+        "de": "IP-Adresse"
       },
       "example": "192.168.1.100"
     },
@@ -30,7 +42,11 @@
       "name": "port",
       "type": "number",
       "title": {
-        "en": "Port"
+        "en": "Port",
+        "nl": "Poort",
+        "es": "Puerto",
+        "fr": "Port",
+        "de": "Port"
       },
       "example": 9330
     }

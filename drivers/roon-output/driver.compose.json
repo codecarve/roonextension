@@ -1,6 +1,10 @@
 {
   "name": {
-    "en": "Output"
+    "en": "Output",
+    "nl": "Uitgang",
+    "es": "Salida",
+    "fr": "Sortie",
+    "de": "Ausgang"
   },
   "class": "speaker",
   "capabilities": [

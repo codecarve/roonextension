@@ -1,6 +1,12 @@
 {
   "type": "boolean",
-  "title": { "en": "Roon radio", "nl": "Roon radio" },
+  "title": {
+    "en": "Roon radio",
+    "nl": "Roon radio",
+    "es": "Radio Roon",
+    "fr": "Radio Roon",
+    "de": "Roon Radio"
+  },
   "getable": true,
   "setable": true,
   "uiComponent": null,
