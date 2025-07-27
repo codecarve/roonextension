@@ -478,6 +478,7 @@ class RoonZoneDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilityAutoRadio - Transport is not available");
+        return;
       }
       transport.change_settings(this.getData().id, {
         auto_radio: value,

@@ -352,6 +352,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerPlaying - Transport is not available");
+        return;
       }
 
       transport.control(this.getData().id, action);
@@ -370,6 +371,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerShuffle - Transport is not available");
+        return;
       }
       transport.change_settings(this.getData().id, {
         shuffle: value,
@@ -396,6 +398,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerRepeat - Transport is not available");
+        return;
       }
       transport.change_settings(this.getData().id, { loop });
     } catch (err) {
@@ -412,6 +415,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerNext - Transport is not available");
+        return;
       }
       transport.control(this.getData().id, "next");
     } catch (err) {
@@ -428,6 +432,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("Transport is not available");
+        return;
       }
       transport.control(this.getData().id, "previous");
     } catch (err) {
@@ -444,6 +449,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerPrevious - Transport is not available");
+        return;
       }
       transport.seek(this.getData().id, "absolute", value);
     } catch (err) {
@@ -600,6 +606,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerWakeUp - Transport is not available");
+        return;
       }
       transport.convenience_switch(this.getData().id, {});
     } catch (err) {
@@ -616,6 +623,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerSleep - Transport is not available");
+        return;
       }
       transport.standby(this.getData().id, {});
     } catch (err) {
@@ -632,6 +640,7 @@ class RoonOutputDevice extends Homey.Device {
       const transport = zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilityAutoRadio - Transport is not available");
+        return;
       }
       transport.change_settings(this.getData().id, {
         auto_radio: value,
