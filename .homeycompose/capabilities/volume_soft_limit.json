@@ -2,7 +2,10 @@
   "type": "number",
   "title": {
     "en": "Volume soft limit",
-    "nl": "Volume soft limiet"
+    "nl": "Volume soft limiet",
+    "es": "Límite de volumen",
+    "fr": "Limite de volume",
+    "de": "Lautstärke-Limit"
   },
   "getable": true,
   "setable": false,

@@ -4,39 +4,63 @@
       "id": "speaker_sleep",
       "title": {
         "en": "Sleep",
-        "nl": "Zet Uit"
+        "nl": "Zet Uit",
+        "es": "Dormir",
+        "fr": "Mettre en veille",
+        "de": "Ruhemodus"
       },
       "titleFormatted": {
-        "en": "Set output to sleep",
-        "nl": "Zet output uit"
+        "en": "Set [[device]] to sleep",
+        "nl": "Zet [[device]] uit",
+        "es": "Poner [[device]] en modo dormir",
+        "fr": "Mettre [[device]] en veille",
+        "de": "[[device]] in Ruhemodus versetzen"
       }
     },
     {
       "id": "speaker_wake_up",
       "title": {
         "en": "Wake Up",
-        "nl": "Zet Aan"
+        "nl": "Zet Aan",
+        "es": "Activar",
+        "fr": "Réveiller",
+        "de": "Aktivieren"
       },
       "titleFormatted": {
-        "en": "Wake up output",
-        "nl": "Zet output aan"
+        "en": "Wake up [[device]]",
+        "nl": "Zet [[device]] aan",
+        "es": "Activar [[device]]",
+        "fr": "Réveiller [[device]]",
+        "de": "[[device]] aktivieren"
       }
     },
     {
       "id": "speaker_auto_radio_output",
       "title": {
         "en": "Roon Radio",
-        "nl": "Roon Radio"
+        "nl": "Roon Radio",
+        "es": "Radio Roon",
+        "fr": "Radio Roon",
+        "de": "Roon Radio"
       },
       "titleFormatted": {
         "en": "Roon Radio [[enabled]]",
-        "nl": "Roon Radio [[enabled]]"
+        "nl": "Roon Radio [[enabled]]",
+        "es": "Radio Roon [[enabled]]",
+        "fr": "Radio Roon [[enabled]]",
+        "de": "Roon Radio [[enabled]]"
       },
       "args": [
         {
           "name": "enabled",
           "type": "checkbox",
-          "title": { "en": "Enabled", "nl": "Actief" }
+          "title": {
+            "en": "Enabled",
+            "nl": "Actief",
+            "es": "Activado",
+            "fr": "Activé",
+            "de": "Aktiviert"
+          }
         }
       ]
     },
@@ -44,11 +68,17 @@
       "id": "artist_radio_output",
       "title": {
         "en": "Play Artist",
-        "nl": "Speel Artiest"
+        "nl": "Speel Artiest",
+        "es": "Reproducir Artista",
+        "fr": "Jouer Artiste",
+        "de": "Künstler Abspielen"
       },
       "titleFormatted": {
         "en": "Play Artist Radio [[artist]]",
-        "nl": "Speel Artiest Radio [[artist]]"
+        "nl": "Speel Artiest Radio [[artist]]",
+        "es": "Reproducir Radio de Artista [[artist]]",
+        "fr": "Jouer Radio Artiste [[artist]]",
+        "de": "Künstler-Radio [[artist]] abspielen"
       },
       "args": [
         {
@@ -56,7 +86,10 @@
           "type": "autocomplete",
           "title": {
             "en": "Artist",
-            "nl": "Artiest"
+            "nl": "Artiest",
+            "es": "Artista",
+            "fr": "Artiste",
+            "de": "Künstler"
           }
         }
       ]
@@ -65,11 +98,17 @@
       "id": "internet_radio_output",
       "title": {
         "en": "Play Internet Radio",
-        "nl": "Speel Internet Radio"
+        "nl": "Speel Internet Radio",
+        "es": "Reproducir Radio de Internet",
+        "fr": "Jouer Radio Internet",
+        "de": "Internetradio Abspielen"
       },
       "titleFormatted": {
         "en": "Play Internet Radio [[internet_radio]]",
-        "nl": "Speel Internet Radio [[internet_radio]]"
+        "nl": "Speel Internet Radio [[internet_radio]]",
+        "es": "Reproducir Radio de Internet [[internet_radio]]",
+        "fr": "Jouer Radio Internet [[internet_radio]]",
+        "de": "Internetradio [[internet_radio]] abspielen"
       },
       "args": [
         {
@@ -77,7 +116,10 @@
           "type": "autocomplete",
           "title": {
             "en": "Internet Radio",
-            "nl": "Internet Radio"
+            "nl": "Internet Radio",
+            "es": "Radio de Internet",
+            "fr": "Radio Internet",
+            "de": "Internetradio"
           }
         }
       ]
@@ -86,11 +128,17 @@
       "id": "playlist_output",
       "title": {
         "en": "Play Playlist",
-        "nl": "Speel Playlist"
+        "nl": "Speel Playlist",
+        "es": "Reproducir Lista",
+        "fr": "Jouer Playlist",
+        "de": "Playlist Abspielen"
       },
       "titleFormatted": {
         "en": "Play Playlist [[playlist]]",
-        "nl": "Speel Playlist [[playlist]]"
+        "nl": "Speel Playlist [[playlist]]",
+        "es": "Reproducir Lista [[playlist]]",
+        "fr": "Jouer Playlist [[playlist]]",
+        "de": "Playlist [[playlist]] abspielen"
       },
       "args": [
         {
@@ -98,7 +146,10 @@
           "type": "autocomplete",
           "title": {
             "en": "Playlist",
-            "nl": "Playlist"
+            "nl": "Playlist",
+            "es": "Lista de Reproducción",
+            "fr": "Playlist",
+            "de": "Playlist"
           }
         }
       ]
@@ -107,11 +158,17 @@
       "id": "genre_shuffle_output",
       "title": {
         "en": "Shuffle Genre",
-        "nl": "Shuffle Genre"
+        "nl": "Shuffle Genre",
+        "es": "Género Aleatorio",
+        "fr": "Genre Aléatoire",
+        "de": "Genre Zufällig"
       },
       "titleFormatted": {
         "en": "Shuffle Genre [[genre]]",
-        "nl": "Shuffle Genre [[genre]]"
+        "nl": "Shuffle Genre [[genre]]",
+        "es": "Reproducir Género [[genre]] Aleatorio",
+        "fr": "Jouer Genre [[genre]] Aléatoire",
+        "de": "Genre [[genre]] zufällig abspielen"
       },
       "args": [
         {
@@ -119,7 +176,10 @@
           "type": "autocomplete",
           "title": {
             "en": "Genre",
-            "nl": "Genre"
+            "nl": "Genre",
+            "es": "Género",
+            "fr": "Genre",
+            "de": "Genre"
           }
         }
       ]

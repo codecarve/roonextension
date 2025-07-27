@@ -1,17 +1,25 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "nl.codecarve.roonextension",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
     "local"
   ],
   "name": {
-    "en": "Roon"
+    "en": "Roon",
+    "nl": "Roon",
+    "es": "Roon",
+    "fr": "Roon",
+    "de": "Roon"
   },
   "description": {
-    "en": "Rediscover your music across every room"
+    "en": "Rediscover your music across every room",
+    "nl": "Herontdek je muziek in elke kamer",
+    "es": "Redescubre tu música en cada habitación",
+    "fr": "Redécouvrez votre musique dans chaque pièce",
+    "de": "Entdecken Sie Ihre Musik in jedem Raum neu"
   },
   "category": [
     "music"
@@ -52,11 +60,17 @@
       {
         "title": {
           "en": "Roon core paired",
-          "nl": "Roon core gekoppeld"
+          "nl": "Roon core gekoppeld",
+          "es": "Roon core emparejado",
+          "fr": "Roon core appairé",
+          "de": "Roon Core gekoppelt"
         },
         "hint": {
           "en": "Roon core is paired",
-          "nl": "Roon core is gekoppeld"
+          "nl": "Roon core is gekoppeld",
+          "es": "Roon core está emparejado",
+          "fr": "Roon core est appairé",
+          "de": "Roon Core ist gekoppelt"
         },
         "tokens": [
           {
@@ -64,7 +78,10 @@
             "type": "string",
             "title": {
               "en": "Name",
-              "nl": "Naam"
+              "nl": "Naam",
+              "es": "Nombre",
+              "fr": "Nom",
+              "de": "Name"
             },
             "example": "ROCK"
           },
@@ -73,7 +90,10 @@
             "type": "string",
             "title": {
               "en": "IP Address",
-              "nl": "IP adres"
+              "nl": "IP adres",
+              "es": "Dirección IP",
+              "fr": "Adresse IP",
+              "de": "IP-Adresse"
             },
             "example": "192.168.1.100"
           },
@@ -81,7 +101,11 @@
             "name": "port",
             "type": "number",
             "title": {
-              "en": "Port"
+              "en": "Port",
+              "nl": "Poort",
+              "es": "Puerto",
+              "fr": "Port",
+              "de": "Port"
             },
             "example": 9330
           }
@@ -91,11 +115,17 @@
       {
         "title": {
           "en": "Roon core unpaired",
-          "nl": "Roon core ontkoppeld"
+          "nl": "Roon core ontkoppeld",
+          "es": "Roon core desemparejado",
+          "fr": "Roon core désappairé",
+          "de": "Roon Core getrennt"
         },
         "hint": {
           "en": "Roon core is unpaired",
-          "nl": "Wanneer een Roon core is ontkoppeld"
+          "nl": "Wanneer een Roon core is ontkoppeld",
+          "es": "Roon core está desemparejado",
+          "fr": "Roon core est désappairé",
+          "de": "Roon Core ist getrennt"
         },
         "tokens": [
           {
@@ -103,7 +133,10 @@
             "type": "string",
             "title": {
               "en": "Name",
-              "nl": "Naam"
+              "nl": "Naam",
+              "es": "Nombre",
+              "fr": "Nom",
+              "de": "Name"
             },
             "example": "ROCK"
           },
@@ -112,7 +145,10 @@
             "type": "string",
             "title": {
               "en": "IP Address",
-              "nl": "IP adres"
+              "nl": "IP adres",
+              "es": "Dirección IP",
+              "fr": "Adresse IP",
+              "de": "IP-Adresse"
             },
             "example": "192.168.1.100"
           },
@@ -120,7 +156,11 @@
             "name": "port",
             "type": "number",
             "title": {
-              "en": "Port"
+              "en": "Port",
+              "nl": "Poort",
+              "es": "Puerto",
+              "fr": "Port",
+              "de": "Port"
             },
             "example": 9330
           }
@@ -132,11 +172,17 @@
       {
         "title": {
           "en": "Core !{{is|isn't}} connected",
-          "nl": "Core !{{is|is niet}} verbonden"
+          "nl": "Core !{{is|is niet}} verbonden",
+          "es": "Core !{{está|no está}} conectado",
+          "fr": "Core !{{est|n'est pas}} connecté",
+          "de": "Core !{{ist|ist nicht}} verbunden"
         },
         "titleFormatted": {
           "en": "[[device]] !{{is|isn't}} connected",
-          "nl": "[[device]] !{{is|is niet}} verbonden"
+          "nl": "[[device]] !{{is|is niet}} verbonden",
+          "es": "[[device]] !{{está|no está}} conectado",
+          "fr": "[[device]] !{{est|n'est pas}} connecté",
+          "de": "[[device]] !{{ist|ist nicht}} verbunden"
         },
         "id": "core_is_paired"
       }
@@ -145,45 +191,72 @@
       {
         "title": {
           "en": "Mute All Zones",
-          "nl": "Demp alle zones"
+          "nl": "Demp alle zones",
+          "es": "Silenciar Todas las Zonas",
+          "fr": "Couper Toutes les Zones",
+          "de": "Alle Zonen Stumm Schalten"
         },
         "titleFormatted": {
           "en": "Mute all zones at once",
-          "nl": "Demp alle zones tegelijk"
+          "nl": "Demp alle zones tegelijk",
+          "es": "Silenciar todas las zonas a la vez",
+          "fr": "Couper toutes les zones en une fois",
+          "de": "Alle Zonen auf einmal stumm schalten"
         },
         "hint": {
           "en": "Mutes all audio outputs across all zones for emergency silence.",
-          "nl": "Dempt alle audio-uitgangen in alle zones voor emergency silence."
+          "nl": "Dempt alle audio-uitgangen in alle zones voor emergency silence.",
+          "es": "Silencia todas las salidas de audio en todas las zonas para silencio de emergencia.",
+          "fr": "Coupe toutes les sorties audio dans toutes les zones pour un silence d'urgence.",
+          "de": "Schaltet alle Audio-Ausgänge in allen Zonen für Notfall-Stille stumm."
         },
         "id": "mute_all"
       },
       {
         "title": {
           "en": "Pause All Zones",
-          "nl": "Pauzeer alle zones"
+          "nl": "Pauzeer alle zones",
+          "es": "Pausar Todas las Zonas",
+          "fr": "Mettre en Pause Toutes les Zones",
+          "de": "Alle Zonen Pausieren"
         },
         "titleFormatted": {
           "en": "Pause all zones simultaneously",
-          "nl": "Pauzeer alle zones tegelijkertijd"
+          "nl": "Pauzeer alle zones tegelijkertijd",
+          "es": "Pausar todas las zonas simultáneamente",
+          "fr": "Mettre en pause toutes les zones simultanément",
+          "de": "Alle Zonen gleichzeitig pausieren"
         },
         "hint": {
           "en": "Pauses playback in all currently playing zones simultaneously.",
-          "nl": "Pauzeert het afspelen in alle momenteel spelende zones tegelijkertijd."
+          "nl": "Pauzeert het afspelen in alle momenteel spelende zones tegelijkertijd.",
+          "es": "Pausa la reproducción en todas las zonas que estén reproduciendo simultáneamente.",
+          "fr": "Met en pause la lecture dans toutes les zones en cours de lecture simultanément.",
+          "de": "Pausiert die Wiedergabe in allen derzeit abspielenden Zonen gleichzeitig."
         },
         "id": "pause_all"
       },
       {
         "title": {
           "en": "Play Queue",
-          "nl": "Speel Wachtrij"
+          "nl": "Speel Wachtrij",
+          "es": "Reproducir Cola",
+          "fr": "Lire la File d'Attente",
+          "de": "Warteschlange Abspielen"
         },
         "titleFormatted": {
           "en": "Resume playback from the queue",
-          "nl": "Hervat afspelen vanuit de wachtrij"
+          "nl": "Hervat afspelen vanuit de wachtrij",
+          "es": "Reanudar reproducción desde la cola",
+          "fr": "Reprendre la lecture depuis la file d'attente",
+          "de": "Wiedergabe aus der Warteschlange fortsetzen"
         },
         "hint": {
           "en": "Resumes playback from the current queue position, useful after playing another playlist.",
-          "nl": "Hervat afspelen vanuit de huidige wachtrij positie, handig na het afspelen van een andere playlist."
+          "nl": "Hervat afspelen vanuit de huidige wachtrij positie, handig na het afspelen van een andere playlist.",
+          "es": "Reanuda la reproducción desde la posición actual de la cola, útil después de reproducir otra lista de reproducción.",
+          "fr": "Reprend la lecture depuis la position actuelle de la file d'attente, utile après avoir joué une autre liste de lecture.",
+          "de": "Setzt die Wiedergabe von der aktuellen Warteschlangen-Position fort, nützlich nach dem Abspielen einer anderen Playlist."
         },
         "args": [
           {
@@ -195,14 +268,44 @@
         "id": "play_queue"
       },
       {
+        "title": {
+          "en": "Turn Off All Outputs",
+          "nl": "Schakel Alle Uitgangen Uit",
+          "es": "Apagar Todas las Salidas",
+          "fr": "Éteindre Toutes les Sorties",
+          "de": "Alle Ausgänge Ausschalten"
+        },
+        "titleFormatted": {
+          "en": "Turn off all outputs one by one",
+          "nl": "Schakel alle uitgangen één voor één uit",
+          "es": "Apagar todas las salidas una por una",
+          "fr": "Éteindre toutes les sorties une par une",
+          "de": "Alle Ausgänge nacheinander ausschalten"
+        },
+        "hint": {
+          "en": "Puts all audio outputs into standby mode one by one. This will turn off all connected devices that support standby.",
+          "nl": "Zet alle audio-uitgangen één voor één in stand-by modus. Dit schakelt alle aangesloten apparaten uit die stand-by ondersteunen.",
+          "es": "Pone todas las salidas de audio en modo de espera una por una. Esto apagará todos los dispositivos conectados que admitan modo de espera.",
+          "fr": "Met toutes les sorties audio en mode veille une par une. Cela éteindra tous les appareils connectés qui prennent en charge la veille.",
+          "de": "Versetzt alle Audio-Ausgänge nacheinander in den Standby-Modus. Dies schaltet alle angeschlossenen Geräte aus, die Standby unterstützen."
+        },
+        "id": "sleep_all"
+      },
+      {
         "id": "speaker_sleep",
         "title": {
           "en": "Sleep",
-          "nl": "Zet Uit"
+          "nl": "Zet Uit",
+          "es": "Dormir",
+          "fr": "Mettre en veille",
+          "de": "Ruhemodus"
         },
         "titleFormatted": {
-          "en": "Set output to sleep",
-          "nl": "Zet output uit"
+          "en": "Set [[device]] to sleep",
+          "nl": "Zet [[device]] uit",
+          "es": "Poner [[device]] en modo dormir",
+          "fr": "Mettre [[device]] en veille",
+          "de": "[[device]] in Ruhemodus versetzen"
         },
         "args": [
           {
@@ -216,11 +319,17 @@
         "id": "speaker_wake_up",
         "title": {
           "en": "Wake Up",
-          "nl": "Zet Aan"
+          "nl": "Zet Aan",
+          "es": "Activar",
+          "fr": "Réveiller",
+          "de": "Aktivieren"
         },
         "titleFormatted": {
-          "en": "Wake up output",
-          "nl": "Zet output aan"
+          "en": "Wake up [[device]]",
+          "nl": "Zet [[device]] aan",
+          "es": "Activar [[device]]",
+          "fr": "Réveiller [[device]]",
+          "de": "[[device]] aktivieren"
         },
         "args": [
           {
@@ -234,11 +343,17 @@
         "id": "speaker_auto_radio_output",
         "title": {
           "en": "Roon Radio",
-          "nl": "Roon Radio"
+          "nl": "Roon Radio",
+          "es": "Radio Roon",
+          "fr": "Radio Roon",
+          "de": "Roon Radio"
         },
         "titleFormatted": {
           "en": "Roon Radio [[enabled]]",
-          "nl": "Roon Radio [[enabled]]"
+          "nl": "Roon Radio [[enabled]]",
+          "es": "Radio Roon [[enabled]]",
+          "fr": "Radio Roon [[enabled]]",
+          "de": "Roon Radio [[enabled]]"
         },
         "args": [
           {
@@ -251,7 +366,10 @@
             "type": "checkbox",
             "title": {
               "en": "Enabled",
-              "nl": "Actief"
+              "nl": "Actief",
+              "es": "Activado",
+              "fr": "Activé",
+              "de": "Aktiviert"
             }
           }
         ]
@@ -260,11 +378,17 @@
         "id": "artist_radio_output",
         "title": {
           "en": "Play Artist",
-          "nl": "Speel Artiest"
+          "nl": "Speel Artiest",
+          "es": "Reproducir Artista",
+          "fr": "Jouer Artiste",
+          "de": "Künstler Abspielen"
         },
         "titleFormatted": {
           "en": "Play Artist Radio [[artist]]",
-          "nl": "Speel Artiest Radio [[artist]]"
+          "nl": "Speel Artiest Radio [[artist]]",
+          "es": "Reproducir Radio de Artista [[artist]]",
+          "fr": "Jouer Radio Artiste [[artist]]",
+          "de": "Künstler-Radio [[artist]] abspielen"
         },
         "args": [
           {
@@ -277,7 +401,10 @@
             "type": "autocomplete",
             "title": {
               "en": "Artist",
-              "nl": "Artiest"
+              "nl": "Artiest",
+              "es": "Artista",
+              "fr": "Artiste",
+              "de": "Künstler"
             }
           }
         ]
@@ -286,11 +413,17 @@
         "id": "internet_radio_output",
         "title": {
           "en": "Play Internet Radio",
-          "nl": "Speel Internet Radio"
+          "nl": "Speel Internet Radio",
+          "es": "Reproducir Radio de Internet",
+          "fr": "Jouer Radio Internet",
+          "de": "Internetradio Abspielen"
         },
         "titleFormatted": {
           "en": "Play Internet Radio [[internet_radio]]",
-          "nl": "Speel Internet Radio [[internet_radio]]"
+          "nl": "Speel Internet Radio [[internet_radio]]",
+          "es": "Reproducir Radio de Internet [[internet_radio]]",
+          "fr": "Jouer Radio Internet [[internet_radio]]",
+          "de": "Internetradio [[internet_radio]] abspielen"
         },
         "args": [
           {
@@ -303,7 +436,10 @@
             "type": "autocomplete",
             "title": {
               "en": "Internet Radio",
-              "nl": "Internet Radio"
+              "nl": "Internet Radio",
+              "es": "Radio de Internet",
+              "fr": "Radio Internet",
+              "de": "Internetradio"
             }
           }
         ]
@@ -312,11 +448,17 @@
         "id": "playlist_output",
         "title": {
           "en": "Play Playlist",
-          "nl": "Speel Playlist"
+          "nl": "Speel Playlist",
+          "es": "Reproducir Lista",
+          "fr": "Jouer Playlist",
+          "de": "Playlist Abspielen"
         },
         "titleFormatted": {
           "en": "Play Playlist [[playlist]]",
-          "nl": "Speel Playlist [[playlist]]"
+          "nl": "Speel Playlist [[playlist]]",
+          "es": "Reproducir Lista [[playlist]]",
+          "fr": "Jouer Playlist [[playlist]]",
+          "de": "Playlist [[playlist]] abspielen"
         },
         "args": [
           {
@@ -329,7 +471,10 @@
             "type": "autocomplete",
             "title": {
               "en": "Playlist",
-              "nl": "Playlist"
+              "nl": "Playlist",
+              "es": "Lista de Reproducción",
+              "fr": "Playlist",
+              "de": "Playlist"
             }
           }
         ]
@@ -338,11 +483,17 @@
         "id": "genre_shuffle_output",
         "title": {
           "en": "Shuffle Genre",
-          "nl": "Shuffle Genre"
+          "nl": "Shuffle Genre",
+          "es": "Género Aleatorio",
+          "fr": "Genre Aléatoire",
+          "de": "Genre Zufällig"
         },
         "titleFormatted": {
           "en": "Shuffle Genre [[genre]]",
-          "nl": "Shuffle Genre [[genre]]"
+          "nl": "Shuffle Genre [[genre]]",
+          "es": "Reproducir Género [[genre]] Aleatorio",
+          "fr": "Jouer Genre [[genre]] Aléatoire",
+          "de": "Genre [[genre]] zufällig abspielen"
         },
         "args": [
           {
@@ -355,7 +506,10 @@
             "type": "autocomplete",
             "title": {
               "en": "Genre",
-              "nl": "Genre"
+              "nl": "Genre",
+              "es": "Género",
+              "fr": "Genre",
+              "de": "Genre"
             }
           }
         ]
@@ -364,11 +518,17 @@
         "id": "speaker_auto_radio_zone",
         "title": {
           "en": "Roon Radio",
-          "nl": "Roon Radio"
+          "nl": "Roon Radio",
+          "es": "Radio Roon",
+          "fr": "Radio Roon",
+          "de": "Roon Radio"
         },
         "titleFormatted": {
           "en": "Roon Radio [[enabled]]",
-          "nl": "Roon Radio [[enabled]]"
+          "nl": "Roon Radio [[enabled]]",
+          "es": "Radio Roon [[enabled]]",
+          "fr": "Radio Roon [[enabled]]",
+          "de": "Roon Radio [[enabled]]"
         },
         "args": [
           {
@@ -381,7 +541,10 @@
             "type": "checkbox",
             "title": {
               "en": "Enabled",
-              "nl": "Actief"
+              "nl": "Actief",
+              "es": "Activado",
+              "fr": "Activé",
+              "de": "Aktiviert"
             }
           }
         ]
@@ -391,7 +554,11 @@
   "drivers": [
     {
       "name": {
-        "en": "Output"
+        "en": "Output",
+        "nl": "Uitgang",
+        "es": "Salida",
+        "fr": "Sortie",
+        "de": "Ausgang"
       },
       "class": "speaker",
       "capabilities": [
@@ -444,7 +611,11 @@
     },
     {
       "name": {
-        "en": "Zone"
+        "en": "Zone",
+        "nl": "Zone",
+        "es": "Zona",
+        "fr": "Zone",
+        "de": "Zone"
       },
       "class": "speaker",
       "capabilities": [
@@ -497,7 +668,10 @@
       "type": "boolean",
       "title": {
         "en": "Roon radio",
-        "nl": "Roon radio"
+        "nl": "Roon radio",
+        "es": "Radio Roon",
+        "fr": "Radio Roon",
+        "de": "Roon Radio"
       },
       "getable": true,
       "setable": true,
@@ -508,13 +682,20 @@
     "speaker_queue_items_remaining": {
       "type": "number",
       "title": {
-        "en": "Queue items remaining",
-        "nl": "Queue items resterend"
+        "en": "Tracks remaining",
+        "nl": "Tracks resterend",
+        "es": "Pistas restantes",
+        "fr": "Pistes restantes",
+        "de": "Verbleibende Titel"
       },
       "getable": true,
       "setable": false,
       "units": {
-        "en": "items"
+        "en": "tracks",
+        "nl": "tracks",
+        "es": "pistas",
+        "fr": "pistes",
+        "de": "Titel"
       },
       "min": 0,
       "step": 1,
@@ -524,13 +705,20 @@
     "speaker_queue_time_remaining": {
       "type": "number",
       "title": {
-        "en": "Queue time remaining",
-        "nl": "Queue tijd resterend"
+        "en": "Time remaining",
+        "nl": "Tijd resterend",
+        "es": "Tiempo restante",
+        "fr": "Temps restant",
+        "de": "Verbleibende Zeit"
       },
       "getable": true,
       "setable": false,
       "units": {
-        "en": "seconds"
+        "en": "seconds",
+        "nl": "seconden",
+        "es": "segundos",
+        "fr": "secondes",
+        "de": "Sekunden"
       },
       "min": 0,
       "step": 1,
@@ -541,7 +729,10 @@
       "type": "boolean",
       "title": {
         "en": "Sleep",
-        "nl": "Slaapstand"
+        "nl": "Slaapstand",
+        "es": "Dormir",
+        "fr": "Mettre en veille",
+        "de": "Ruhemodus"
       },
       "getable": false,
       "setable": true,
@@ -553,7 +744,10 @@
       "type": "boolean",
       "title": {
         "en": "Wake-up",
-        "nl": "Wekken"
+        "nl": "Wekken",
+        "es": "Activar",
+        "fr": "Réveiller",
+        "de": "Aktivieren"
       },
       "getable": false,
       "setable": true,
@@ -565,7 +759,10 @@
       "type": "number",
       "title": {
         "en": "Volume soft limit",
-        "nl": "Volume soft limiet"
+        "nl": "Volume soft limiet",
+        "es": "Límite de volumen",
+        "fr": "Limite de volume",
+        "de": "Lautstärke-Limit"
       },
       "getable": true,
       "setable": false,

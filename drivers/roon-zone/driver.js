@@ -10,6 +10,14 @@ class RoonZoneDriver extends Homey.Driver {
    */
   async onInit() {
     this.log("RoonZoneDriver has been initialized");
+
+    // Register flow action for auto radio
+    const autoRadioAction = this.homey.flow.getActionCard(
+      "speaker_auto_radio_zone",
+    );
+    autoRadioAction.registerRunListener(async (args, state) => {
+      return args.device.onCapabilityAutoRadio(args.enabled, null);
+    });
   }
 
   /**

@@ -53,24 +53,11 @@ class RoonOutputDevice extends Homey.Device {
       { cap: "speaker_wake_up", handler: this.onCapabilitySpeakerWakeUp },
       { cap: "speaker_sleep", handler: this.onCapabilitySpeakerSleep },
       { cap: "speaker_auto_radio", handler: this.onCapabilityAutoRadio },
+      { cap: "volume_soft_limit", handler: this.onCapabilityVolumeSoftLimit },
     ];
 
     capabilityListeners.forEach(({ cap, handler }) => {
       this.registerCapabilityListener(cap, handler.bind(this));
-    });
-
-    const speakerWakeUpActionCard =
-      this.homey.flow.getActionCard("speaker_wake_up");
-
-    speakerWakeUpActionCard.registerRunListener(async (args, state) => {
-      await this.onCapabilitySpeakerWakeUp(true, null);
-    });
-
-    const speakerSleepActionCard =
-      this.homey.flow.getActionCard("speaker_sleep");
-
-    speakerSleepActionCard.registerRunListener(async (args, state) => {
-      await this.onCapabilitySpeakerSleep(true, null);
     });
 
     // now we want the state of the output to be updated
@@ -81,68 +68,6 @@ class RoonOutputDevice extends Homey.Device {
         await this.updateZones([this.zone]);
       }
     }
-
-    const autoRadioAction = this.homey.flow.getActionCard(
-      "speaker_auto_radio_output",
-    );
-    autoRadioAction.registerRunListener(async (args, state) => {
-      await this.onCapabilityAutoRadio(args.enabled, null);
-    });
-
-    // Register a new flow action for browsing artist radio
-    const artistRadioOutputActionCard = this.homey.flow.getActionCard(
-      "artist_radio_output",
-    );
-
-    artistRadioOutputActionCard.registerArgumentAutocompleteListener(
-      "artist",
-      this.onRegisterArgumentAutocompleteListenerArtistRadio.bind(this),
-    );
-
-    artistRadioOutputActionCard.registerRunListener(
-      this.onRunListenerArtistRadioOutputActionCard.bind(this),
-    );
-
-    // Register a new flow action for browsing internet radio
-    const internetRadioOutputActionCard = this.homey.flow.getActionCard(
-      "internet_radio_output",
-    );
-
-    internetRadioOutputActionCard.registerArgumentAutocompleteListener(
-      "internet_radio",
-      this.onRegisterArgumentAutocompleteListenerInternetRadio.bind(this),
-    );
-
-    internetRadioOutputActionCard.registerRunListener(
-      this.onRunListenerInternetRadioOutputActionCard.bind(this),
-    );
-
-    // Register a new flow action for browsing playlists
-    const playlistOutputActionCard =
-      this.homey.flow.getActionCard("playlist_output");
-
-    playlistOutputActionCard.registerArgumentAutocompleteListener(
-      "playlist",
-      this.onRegisterArgumentAutocompleteListenerPlaylist.bind(this),
-    );
-
-    playlistOutputActionCard.registerRunListener(
-      this.onRunListenerPlaylistOutputActionCard.bind(this),
-    );
-
-    // Register a new flow action for browsing genres
-    const genreOutputActionCard = this.homey.flow.getActionCard(
-      "genre_shuffle_output",
-    );
-
-    genreOutputActionCard.registerArgumentAutocompleteListener(
-      "genre",
-      this.onRegisterArgumentAutocompleteListenerGenre.bind(this),
-    );
-
-    genreOutputActionCard.registerRunListener(
-      this.onRunListenerGenreOutputActionCard.bind(this),
-    );
 
     this.log("RoonOutputDevice has been initialized");
   }
@@ -373,7 +298,13 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilitySpeakerShuffle - Transport is not available");
         return;
       }
-      transport.change_settings(this.getData().id, {
+      
+      if (!this.zone || !this.zone.zone_id) {
+        this.error("onCapabilitySpeakerShuffle - Zone is not available");
+        return;
+      }
+      
+      transport.change_settings(this.zone.zone_id, {
         shuffle: value,
       });
     } catch (err) {
@@ -400,7 +331,13 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilitySpeakerRepeat - Transport is not available");
         return;
       }
-      transport.change_settings(this.getData().id, { loop });
+      
+      if (!this.zone || !this.zone.zone_id) {
+        this.error("onCapabilitySpeakerRepeat - Zone is not available");
+        return;
+      }
+      
+      transport.change_settings(this.zone.zone_id, { loop });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerRepeat - Setting loop to ${value} failed! Error:  ${err.message}`,
@@ -599,6 +536,20 @@ class RoonOutputDevice extends Homey.Device {
     }
   };
 
+  onCapabilityVolumeSoftLimit = async (value, opts) => {
+    this.log("onCapabilityVolumeSoftLimit", value, opts);
+    const softLimitToSet = Math.max(0, Math.min(100, value));
+    this.log(`Setting volume soft limit to: ${softLimitToSet}`);
+
+    try {
+      await this.setCapabilityValue("volume_soft_limit", softLimitToSet);
+    } catch (err) {
+      this.error(
+        `onCapabilityVolumeSoftLimit - Setting soft limit failed! Error: ${err.message}`,
+      );
+    }
+  };
+
   onCapabilitySpeakerWakeUp = (value, opts) => {
     this.log("onCapabilitySpeakerWakeUp", value, opts);
 
@@ -642,7 +593,13 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilityAutoRadio - Transport is not available");
         return;
       }
-      transport.change_settings(this.getData().id, {
+      
+      if (!this.zone || !this.zone.zone_id) {
+        this.error("onCapabilityAutoRadio - Zone is not available");
+        return;
+      }
+      
+      transport.change_settings(this.zone.zone_id, {
         auto_radio: value,
       });
     } catch (err) {
@@ -654,10 +611,6 @@ class RoonOutputDevice extends Homey.Device {
 
   async onRegisterArgumentAutocompleteListenerArtistRadio(query, args) {
     this.log("autocompleting: ", query);
-
-    if (query.length === 0) {
-      return [];
-    }
 
     const { core } = this.homey.app;
     const browse = new RoonApiBrowse(core);
@@ -676,9 +629,12 @@ class RoonOutputDevice extends Homey.Device {
 
     artists.items = artists.items.sort(() => 0.5 - Math.random());
 
-    artists.items = artists.items.filter((a) =>
-      a.title.toLowerCase().includes(query.toLowerCase()),
-    );
+    // Filter only if query is not empty
+    if (query.length > 0) {
+      artists.items = artists.items.filter((a) =>
+        a.title.toLowerCase().includes(query.toLowerCase()),
+      );
+    }
 
     this.log(`found ${artists.items.length} artists`);
     this.log("first item: ", artists.items[0]);
@@ -796,10 +752,6 @@ class RoonOutputDevice extends Homey.Device {
   async onRegisterArgumentAutocompleteListenerInternetRadio(query, args) {
     this.log("autocompleting: ", query);
 
-    if (query.length === 0) {
-      return [];
-    }
-
     const { core } = this.homey.app;
     const browse = new RoonApiBrowse(core);
 
@@ -822,9 +774,12 @@ class RoonOutputDevice extends Homey.Device {
       () => 0.5 - Math.random(),
     );
 
-    internet_radios.items = internet_radios.items.filter((a) =>
-      a.title.toLowerCase().includes(query.toLowerCase()),
-    );
+    // Filter only if query is not empty
+    if (query.length > 0) {
+      internet_radios.items = internet_radios.items.filter((a) =>
+        a.title.toLowerCase().includes(query.toLowerCase()),
+      );
+    }
 
     this.log(`found ${internet_radios.items.length} internet radios`);
     this.log("first item: ", internet_radios.items[0]);
@@ -921,10 +876,6 @@ class RoonOutputDevice extends Homey.Device {
   async onRegisterArgumentAutocompleteListenerPlaylist(query, args) {
     this.log("autocompleting: ", query);
 
-    if (query.length === 0) {
-      return [];
-    }
-
     const { core } = this.homey.app;
     const browse = new RoonApiBrowse(core);
 
@@ -942,9 +893,12 @@ class RoonOutputDevice extends Homey.Device {
 
     playlists.items = playlists.items.sort(() => 0.5 - Math.random());
 
-    playlists.items = playlists.items.filter((a) =>
-      a.title.toLowerCase().includes(query.toLowerCase()),
-    );
+    // Filter only if query is not empty
+    if (query.length > 0) {
+      playlists.items = playlists.items.filter((a) =>
+        a.title.toLowerCase().includes(query.toLowerCase()),
+      );
+    }
 
     this.log(`found ${playlists.items.length} playlists`);
     this.log("first item: ", playlists.items[0]);
@@ -1210,10 +1164,6 @@ class RoonOutputDevice extends Homey.Device {
   async onRegisterArgumentAutocompleteListenerGenre(query, args) {
     this.log(`autocompleting genres: ${query} ${query.length} `);
 
-    if (query.length === 0) {
-      return [];
-    }
-
     const { core } = this.homey.app;
     const browse = new RoonApiBrowse(core);
 
@@ -1232,9 +1182,12 @@ class RoonOutputDevice extends Homey.Device {
 
     genres.items = genres.items.sort(() => 0.5 - Math.random());
 
-    genres.items = genres.items.filter((a) =>
-      a.title.toLowerCase().includes(query.toLowerCase()),
-    );
+    // Filter only if query is not empty
+    if (query.length > 0) {
+      genres.items = genres.items.filter((a) =>
+        a.title.toLowerCase().includes(query.toLowerCase()),
+      );
+    }
 
     this.log(`found ${genres.items.length} genres`);
     this.log("first item: ", genres.items[0]);

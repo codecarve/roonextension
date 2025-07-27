@@ -29,9 +29,9 @@ class RoonApp extends Homey.App {
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.1.10",
+      display_version: "1.1.11",
       publisher: "CodeCarve",
-      email: "help@codecarve.nl",
+      email: "support@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
       log_level: "none",
       force_server: true,
@@ -132,6 +132,11 @@ class RoonApp extends Homey.App {
     const pauseAllAction = this.homey.flow.getActionCard("pause_all");
     pauseAllAction.registerRunListener(async (args, state) => {
       return this.pauseAllZones();
+    });
+
+    const sleepAllAction = this.homey.flow.getActionCard("sleep_all");
+    sleepAllAction.registerRunListener(async (args, state) => {
+      return this.sleepAllOutputs();
     });
 
     const playQueueAction = this.homey.flow.getActionCard("play_queue");
@@ -241,6 +246,52 @@ class RoonApp extends Homey.App {
     }
 
     this.log(`Paused ${pausedCount} zones, ${errorCount} errors`);
+    return true;
+  }
+
+  async sleepAllOutputs() {
+    if (!this.transport) {
+      throw new Error("Roon core not connected");
+    }
+
+    // Add small delay to allow any pending operations to settle
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    // Get all outputs from all zones
+    const zones = Object.values(zoneManager.zones);
+    const outputs = [];
+
+    for (const zone of zones) {
+      for (const output of zone.outputs || []) {
+        outputs.push(output);
+      }
+    }
+
+    this.log(`Turning off ${outputs.length} outputs one by one`);
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Process outputs one by one with a small delay between each
+    for (const output of outputs) {
+      try {
+        this.transport.standby(output.output_id, {});
+        successCount++;
+        this.log(
+          `Successfully sent standby command to output: ${output.display_name}`,
+        );
+
+        // Small delay between outputs to avoid overwhelming the system
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } catch (error) {
+        errorCount++;
+        this.error(`Failed to turn off output ${output.display_name}:`, error);
+      }
+    }
+
+    this.log(
+      `Sleep all operation completed. Success: ${successCount}, Errors: ${errorCount}`,
+    );
     return true;
   }
 

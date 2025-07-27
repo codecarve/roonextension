@@ -57,13 +57,6 @@ class RoonZoneDevice extends Homey.Device {
       }
     }
 
-    const autoRadioAction = this.homey.flow.getActionCard(
-      "speaker_auto_radio_zone",
-    );
-    autoRadioAction.registerRunListener(async (args, state) => {
-      await this.onCapabilityAutoRadio(args.enabled, null);
-    });
-
     this.log("RoonZoneDevice has been initialized");
   }
 

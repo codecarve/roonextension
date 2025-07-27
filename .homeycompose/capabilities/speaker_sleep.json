@@ -1,6 +1,12 @@
 {
   "type": "boolean",
-  "title": { "en": "Sleep", "nl": "Slaapstand" },
+  "title": {
+    "en": "Sleep",
+    "nl": "Slaapstand",
+    "es": "Dormir",
+    "fr": "Mettre en veille",
+    "de": "Ruhemodus"
+  },
   "getable": false,
   "setable": true,
   "uiComponent": null,

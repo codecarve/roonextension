@@ -4,17 +4,29 @@
       "id": "speaker_auto_radio_zone",
       "title": {
         "en": "Roon Radio",
-        "nl": "Roon Radio"
+        "nl": "Roon Radio",
+        "es": "Radio Roon",
+        "fr": "Radio Roon",
+        "de": "Roon Radio"
       },
       "titleFormatted": {
         "en": "Roon Radio [[enabled]]",
-        "nl": "Roon Radio [[enabled]]"
+        "nl": "Roon Radio [[enabled]]",
+        "es": "Radio Roon [[enabled]]",
+        "fr": "Radio Roon [[enabled]]",
+        "de": "Roon Radio [[enabled]]"
       },
       "args": [
         {
           "name": "enabled",
           "type": "checkbox",
-          "title": { "en": "Enabled", "nl": "Actief" }
+          "title": {
+            "en": "Enabled",
+            "nl": "Actief",
+            "es": "Activado",
+            "fr": "Activé",
+            "de": "Aktiviert"
+          }
         }
       ]
     }

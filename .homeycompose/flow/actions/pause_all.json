@@ -1,14 +1,23 @@
 {
   "title": {
     "en": "Pause All Zones",
-    "nl": "Pauzeer alle zones"
+    "nl": "Pauzeer alle zones",
+    "es": "Pausar Todas las Zonas",
+    "fr": "Mettre en Pause Toutes les Zones",
+    "de": "Alle Zonen Pausieren"
   },
   "titleFormatted": {
     "en": "Pause all zones simultaneously",
-    "nl": "Pauzeer alle zones tegelijkertijd"
+    "nl": "Pauzeer alle zones tegelijkertijd",
+    "es": "Pausar todas las zonas simultáneamente",
+    "fr": "Mettre en pause toutes les zones simultanément",
+    "de": "Alle Zonen gleichzeitig pausieren"
   },
   "hint": {
     "en": "Pauses playback in all currently playing zones simultaneously.",
-    "nl": "Pauzeert het afspelen in alle momenteel spelende zones tegelijkertijd."
+    "nl": "Pauzeert het afspelen in alle momenteel spelende zones tegelijkertijd.",
+    "es": "Pausa la reproducción en todas las zonas que estén reproduciendo simultáneamente.",
+    "fr": "Met en pause la lecture dans toutes les zones en cours de lecture simultanément.",
+    "de": "Pausiert die Wiedergabe in allen derzeit abspielenden Zonen gleichzeitig."
   }
 }

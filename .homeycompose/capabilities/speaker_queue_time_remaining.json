@@ -1,13 +1,20 @@
 {
   "type": "number",
   "title": {
-    "en": "Queue time remaining",
-    "nl": "Queue tijd resterend"
+    "en": "Time remaining",
+    "nl": "Tijd resterend",
+    "es": "Tiempo restante",
+    "fr": "Temps restant",
+    "de": "Verbleibende Zeit"
   },
   "getable": true,
   "setable": false,
   "units": {
-    "en": "seconds"
+    "en": "seconds",
+    "nl": "seconden",
+    "es": "segundos",
+    "fr": "secondes",
+    "de": "Sekunden"
   },
   "min": 0,
   "step": 1,

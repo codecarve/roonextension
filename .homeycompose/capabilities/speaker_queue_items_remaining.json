@@ -1,13 +1,20 @@
 {
   "type": "number",
   "title": {
-    "en": "Queue items remaining",
-    "nl": "Queue items resterend"
+    "en": "Tracks remaining",
+    "nl": "Tracks resterend",
+    "es": "Pistas restantes",
+    "fr": "Pistes restantes",
+    "de": "Verbleibende Titel"
   },
   "getable": true,
   "setable": false,
   "units": {
-    "en": "items"
+    "en": "tracks",
+    "nl": "tracks",
+    "es": "pistas",
+    "fr": "pistes",
+    "de": "Titel"
   },
   "min": 0,
   "step": 1,
