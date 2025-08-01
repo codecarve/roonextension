@@ -7,3 +7,4 @@
 .cursor/
 *.local.md
 *.local.json
+temp/

@@ -1,0 +1,63 @@
+{
+  "title": {
+    "en": "Repeat",
+    "nl": "Herhalen",
+    "da": "Gentag",
+    "de": "Wiederholen",
+    "es": "Repetir",
+    "fr": "Répéter",
+    "it": "Ripeti",
+    "no": "Gjenta",
+    "sv": "Upprepa"
+  },
+  "type": "enum",
+  "values": [
+    {
+      "id": "none",
+      "title": {
+        "en": "Off",
+        "nl": "Uit",
+        "da": "Fra",
+        "de": "Aus",
+        "es": "Apagado",
+        "fr": "Désactivé",
+        "it": "Spento",
+        "no": "Av",
+        "sv": "Av"
+      }
+    },
+    {
+      "id": "track",
+      "title": {
+        "en": "Repeat Track",
+        "nl": "Nummer herhalen",
+        "da": "Gentag nummer",
+        "de": "Titel wiederholen",
+        "es": "Repetir pista",
+        "fr": "Répéter la piste",
+        "it": "Ripeti traccia",
+        "no": "Gjenta spor",
+        "sv": "Upprepa spår"
+      }
+    },
+    {
+      "id": "playlist",
+      "title": {
+        "en": "Repeat Playlist",
+        "nl": "Afspeellijst herhalen",
+        "da": "Gentag afspilningsliste",
+        "de": "Wiedergabeliste wiederholen",
+        "es": "Repetir lista de reproducción",
+        "fr": "Répéter la playlist",
+        "it": "Ripeti playlist",
+        "no": "Gjenta spilleliste",
+        "sv": "Upprepa spellista"
+      }
+    }
+  ],
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "insights": false,
+  "icon": "/assets/speaker_repeat.svg"
+}

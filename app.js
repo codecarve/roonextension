@@ -29,7 +29,7 @@ class RoonApp extends Homey.App {
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.1.11",
+      display_version: "1.1.12",
       publisher: "CodeCarve",
       email: "support@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
@@ -42,6 +42,7 @@ class RoonApp extends Homey.App {
           this.core = core;
           this.transport = core.services.RoonApiTransport;
           this.imageDriver = core.services.RoonApiImage;
+          this.browse = core.services.RoonApiBrowse;
 
           this.unsubscribe = this.transport.subscribe_zones(
             (response, data) => {

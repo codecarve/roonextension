@@ -4,7 +4,6 @@ const Homey = require("homey");
 
 const zoneManager = require("../../lib/zone-manager");
 const imageUtil = require("../../lib/image-util");
-const RoonApiBrowse = require("node-roon-api-browse");
 
 const {
   browseAndLoadAllHierarchy,
@@ -298,12 +297,12 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilitySpeakerShuffle - Transport is not available");
         return;
       }
-      
+
       if (!this.zone || !this.zone.zone_id) {
         this.error("onCapabilitySpeakerShuffle - Zone is not available");
         return;
       }
-      
+
       transport.change_settings(this.zone.zone_id, {
         shuffle: value,
       });
@@ -331,12 +330,12 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilitySpeakerRepeat - Transport is not available");
         return;
       }
-      
+
       if (!this.zone || !this.zone.zone_id) {
         this.error("onCapabilitySpeakerRepeat - Zone is not available");
         return;
       }
-      
+
       transport.change_settings(this.zone.zone_id, { loop });
     } catch (err) {
       this.error(
@@ -593,12 +592,12 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilityAutoRadio - Transport is not available");
         return;
       }
-      
+
       if (!this.zone || !this.zone.zone_id) {
         this.error("onCapabilityAutoRadio - Zone is not available");
         return;
       }
-      
+
       transport.change_settings(this.zone.zone_id, {
         auto_radio: value,
       });
@@ -609,80 +608,79 @@ class RoonOutputDevice extends Homey.Device {
     }
   };
 
+  // Helper method for browse autocomplete to reduce code duplication
+  async _genericBrowseAutocomplete(query, hierarchy, typeName, errorContext) {
+    this.log(`autocompleting ${typeName}: `, query);
+
+    try {
+      const app = this.homey.app;
+      if (!app) {
+        this.error("App instance is not available");
+        return [];
+      }
+
+      const core = app.core;
+      if (!core) {
+        this.error("Roon core is not available - is Roon paired?");
+        return [];
+      }
+
+      const browse = app.browse;
+      if (!browse) {
+        this.error("Browse service is not available - is Roon paired?");
+        return [];
+      }
+
+      const items = await browseAndLoadAllHierarchy(browse, hierarchy);
+
+      // Filter only if query is not empty
+      if (query.length > 0) {
+        items.items = items.items.filter((item) =>
+          item.title.toLowerCase().includes(query.toLowerCase())
+        );
+      }
+
+      this.log(`found ${items.items.length} ${typeName}`);
+
+      return items.items.map((item) => ({
+        id: item.item_key,
+        name: item.title,
+      }));
+    } catch (error) {
+      this.error(`Error in ${errorContext} autocomplete:`, error);
+      return [];
+    }
+  }
+
+  // Helper method for action validation and setup
+  async _validateAndGetBrowse(args, argName) {
+    const item = args[argName];
+    
+    if (!item || !item.name || item.name.trim().length === 0) {
+      throw new Error(`${argName.charAt(0).toUpperCase() + argName.slice(1)} is not defined`);
+    }
+
+    const app = this.homey.app;
+    if (!app || !app.browse) {
+      throw new Error("Browse service is not available");
+    }
+
+    return app.browse;
+  }
+
   async onRegisterArgumentAutocompleteListenerArtistRadio(query, args) {
-    this.log("autocompleting: ", query);
-
-    const { core } = this.homey.app;
-    const browse = new RoonApiBrowse(core);
-
-    if (!browse) {
-      this.error("Browse instance is not available");
-      return;
-    }
-
-    const artists = await browseAndLoadAllHierarchy(browse, "artists");
-
-    console.log("artists: ", artists);
-
-    // now I want to put all items in artists.items in a random order
-    // I want to provide a function to shuffle the items
-
-    artists.items = artists.items.sort(() => 0.5 - Math.random());
-
-    // Filter only if query is not empty
-    if (query.length > 0) {
-      artists.items = artists.items.filter((a) =>
-        a.title.toLowerCase().includes(query.toLowerCase()),
-      );
-    }
-
-    this.log(`found ${artists.items.length} artists`);
-    this.log("first item: ", artists.items[0]);
-    // artists.items[0]:
-    // {
-    //   action: 'list',
-    //       list: {
-    //   level: 0,
-    //       title: 'Artists',
-    //       subtitle: null,
-    //       image_key: null,
-    //       count: 584,
-    //       display_offset: null
-    // }
-
-    this.log("offset: ", artists.offset);
-    this.log("list: ", artists.list);
-    // artists.list:
-    // {
-    //   level: 0,
-    //       title: 'Artists',
-    //     subtitle: null,
-    //     image_key: null,
-    //     count: 584,
-    //     display_offset: null
-    // }
-
-    return artists.items.map((artist) => {
-      return {
-        id: artist.item_key,
-        name: artist.title,
-      };
-    });
+    return this._genericBrowseAutocomplete(query, "artists", "artists", "artist radio");
   }
 
   async onRunListenerArtistRadioOutputActionCard(args, state) {
     try {
       const { artist } = args;
 
-      // artist: { id: '17:314', name: 'Lenny Kravitz' }
+      this.log("===== ARTIST RADIO ACTION START =====");
       this.log(`Play artist action - ${artist.name}`);
+      this.log("Artist args:", JSON.stringify(artist, null, 2));
 
-      if (!artist || !artist.name || artist.name.trim().length === 0) {
-        throw new Error("Artist is not defined");
-      }
-
-      const { core } = this.homey.app;
-      const browse = new RoonApiBrowse(core);
+      const browse = await this._validateAndGetBrowse(args, "artist");
 
       const artistsResult = await browseAndLoadAllHierarchy(browse, "artists");
 
@@ -692,7 +690,7 @@ class RoonOutputDevice extends Homey.Device {
       this.log(`Found ${filteredArtists.length} artists`);
 
       if (filteredArtists.length === 0) {
-        throw new Error(`Artist ${artist.name} was not found`);
+        throw new Error(`Artist "${artist.name}" was not found`);
       }
       const artistItem = filteredArtists[0];
       this.log("Artist item:", artistItem);
@@ -709,8 +707,7 @@ class RoonOutputDevice extends Homey.Device {
         (i) => i.title === "Play Artist",
       );
       if (!playArtistItem) {
-        this.error("Play Artist Item was not found");
-        return;
+        throw new Error("'Play Artist' action was not found in artist menu");
       }
 
       const radioResult = await browseAndLoadItemLevel(
@@ -725,8 +722,7 @@ class RoonOutputDevice extends Homey.Device {
         (i) => i.title === "Start Radio",
       );
       if (!startRadioItem) {
-        this.error("Start Radio was not found");
-        return;
+        throw new Error("'Start Radio' option was not found in play modes");
       }
 
       this.log("the title: ", startRadioItem.title);
@@ -744,674 +740,229 @@ class RoonOutputDevice extends Homey.Device {
         this.getData().id,
         startRadioItem.item_key,
       );
+      this.log("===== ARTIST RADIO ACTION END =====");
     } catch (error) {
       this.error((error && error.message) || error);
+      this.log("===== ARTIST RADIO ACTION ERROR =====");
+      throw error;
     }
   }
 
   async onRegisterArgumentAutocompleteListenerInternetRadio(query, args) {
-    this.log("autocompleting: ", query);
-
-    const { core } = this.homey.app;
-    const browse = new RoonApiBrowse(core);
-
-    if (!browse) {
-      this.error("Browse instance is not available");
-      return;
-    }
-
-    const internet_radios = await browseAndLoadAllHierarchy(
-      browse,
-      "internet_radio",
-    );
-
-    console.log("internet_radios: ", internet_radios);
-
-    // now I want to put all items in artists.items in a random order
-    // I want to provide a function to shuffle the items
-
-    internet_radios.items = internet_radios.items.sort(
-      () => 0.5 - Math.random(),
-    );
-
-    // Filter only if query is not empty
-    if (query.length > 0) {
-      internet_radios.items = internet_radios.items.filter((a) =>
-        a.title.toLowerCase().includes(query.toLowerCase()),
-      );
-    }
-
-    this.log(`found ${internet_radios.items.length} internet radios`);
-    this.log("first item: ", internet_radios.items[0]);
-    // artists.items[0]:
-    // {
-    //   action: 'list',
-    //       list: {
-    //   level: 0,
-    //       title: 'Artists',
-    //       subtitle: null,
-    //       image_key: null,
-    //       count: 584,
-    //       display_offset: null
-    // }
-
-    this.log("offset: ", internet_radios.offset);
-    this.log("list: ", internet_radios.list);
-    // artists.list:
-    // {
-    //   level: 0,
-    //       title: 'Artists',
-    //     subtitle: null,
-    //     image_key: null,
-    //     count: 584,
-    //     display_offset: null
-    // }
-
-    return internet_radios.items.map((radio) => {
-      return {
-        id: radio.item_key,
-        name: radio.title,
-      };
-    });
+    return this._genericBrowseAutocomplete(query, "internet_radio", "internet radios", "internet radio");
   }
 
   async onRunListenerInternetRadioOutputActionCard(args, state) {
-    // artist: { id: '17:314', name: 'Lenny Kravitz' },
-    const { internet_radio } = args;
+    try {
+      const { internet_radio } = args;
 
-    this.log(`Play internet radio action - ${internet_radio.name}`);
+      this.log("===== INTERNET RADIO ACTION START =====");
+      this.log(`Play internet radio action - ${internet_radio.name}`);
+      this.log("Internet radio args:", JSON.stringify(internet_radio, null, 2));
 
-    if (
-      !internet_radio ||
-      !internet_radio.name ||
-      internet_radio.name.length === 0
-    ) {
-      this.error("Internet radio is not defined");
-      return;
+      const browse = await this._validateAndGetBrowse(args, "internet_radio");
+
+      // Re-search is required - Roon API item keys are dynamic and change between calls
+      const internetRadiosResult = await browseAndLoadAllHierarchy(
+        browse,
+        "internet_radio"
+      );
+
+      const filteredRadios = internetRadiosResult.items.filter((a) =>
+        a.title.toLowerCase().includes(internet_radio.name.toLowerCase())
+      );
+      this.log(`Found ${filteredRadios.length} internet radios`);
+      
+      if (filteredRadios.length === 0) {
+        throw new Error(`Internet radio station "${internet_radio.name}" was not found`);
+      }
+
+      const internetRadioItem = filteredRadios[0];
+      this.log("Internet radio item:", internetRadioItem);
+
+      // Ensure that the zone exists before attempting to send the command
+      if (!this.zone || !this.zone.zone_id) {
+        throw new Error("Current zone is not available");
+      }
+
+      // Internet radio plays directly without navigation
+      await browseZoneOrOutput(
+        browse,
+        "internet_radio",
+        this.getData().id,
+        internetRadioItem.item_key
+      );
+
+      this.log("===== INTERNET RADIO ACTION END =====");
+    } catch (error) {
+      this.error((error && error.message) || error);
+      this.log("===== INTERNET RADIO ACTION ERROR =====");
+      throw error;
     }
-
-    const { core } = this.homey.app;
-    const browse = new RoonApiBrowse(core);
-
-    if (!browse) {
-      this.error("Browse instance is not available");
-      return;
-    }
-
-    // we cannot trust this number so let's just search again for the artist
-    const internetRadios = await browseAndLoadAllHierarchy(
-      browse,
-      "internet_radio",
-    );
-
-    console.log("internetRadios: ", JSON.stringify(internetRadios, null, 2));
-
-    internetRadios.items = internetRadios.items.filter((a) =>
-      a.title.toLowerCase().includes(internet_radio.name.toLowerCase()),
-    );
-    console.log(`found ${internetRadios.items.length} internet radios`);
-    if (internetRadios.items.length === 0) {
-      this.error(`Internet radio ${internetRadios} was not found`);
-      return;
-    }
-
-    const internetRadioItem = internetRadios.items[0];
-    this.log("item: ", internetRadioItem);
-
-    browse.browse(
-      {
-        hierarchy: "internet_radio",
-        zone_or_output_id: this.getData().id,
-        item_key: internetRadioItem.item_key,
-      },
-      (error5, body5) => {
-        if (error5) {
-          this.error(error5);
-        }
-        this.log("browse5", body5);
-      },
-    );
   }
 
   async onRegisterArgumentAutocompleteListenerPlaylist(query, args) {
-    this.log("autocompleting: ", query);
-
-    const { core } = this.homey.app;
-    const browse = new RoonApiBrowse(core);
-
-    if (!browse) {
-      this.error("Browse instance is not available");
-      return;
-    }
-
-    const playlists = await browseAndLoadAllHierarchy(browse, "playlists");
-
-    console.log("playlists: ", playlists);
-
-    // now I want to put all items in artists.items in a random order
-    // I want to provide a function to shuffle the items
-
-    playlists.items = playlists.items.sort(() => 0.5 - Math.random());
-
-    // Filter only if query is not empty
-    if (query.length > 0) {
-      playlists.items = playlists.items.filter((a) =>
-        a.title.toLowerCase().includes(query.toLowerCase()),
-      );
-    }
-
-    this.log(`found ${playlists.items.length} playlists`);
-    this.log("first item: ", playlists.items[0]);
-    // artists.items[0]:
-    // {
-    //   action: 'list',
-    //       list: {
-    //   level: 0,
-    //       title: 'Artists',
-    //       subtitle: null,
-    //       image_key: null,
-    //       count: 584,
-    //       display_offset: null
-    // }
-
-    this.log("offset: ", playlists.offset);
-    this.log("list: ", playlists.list);
-    // artists.list:
-    // {
-    //   level: 0,
-    //       title: 'Artists',
-    //     subtitle: null,
-    //     image_key: null,
-    //     count: 584,
-    //     display_offset: null
-    // }
-
-    return playlists.items.map((playlist) => {
-      return {
-        id: playlist.item_key,
-        name: playlist.title,
-      };
-    });
+    return this._genericBrowseAutocomplete(query, "playlists", "playlists", "playlist");
   }
 
   async onRunListenerPlaylistOutputActionCard(args, state) {
-    // artist: { id: '17:314', name: 'Lenny Kravitz' },
-    const { playlist } = args;
+    try {
+      const { playlist } = args;
 
-    this.log(`Play playlist action - ${playlist.name}`);
+      this.log("===== PLAYLIST ACTION START =====");
+      this.log(`Play playlist action - ${playlist.name}`);
+      this.log("Playlist args:", JSON.stringify(playlist, null, 2));
 
-    if (!playlist || !playlist.name || playlist.name.length === 0) {
-      this.error("Playlist is not defined");
-      return;
+      const browse = await this._validateAndGetBrowse(args, "playlist");
+
+      // Re-search is required - Roon API item keys are dynamic and change between calls
+      const playlistsResult = await browseAndLoadAllHierarchy(browse, "playlists");
+      
+      const filteredPlaylists = playlistsResult.items.filter((a) =>
+        a.title.toLowerCase().includes(playlist.name.toLowerCase()),
+      );
+      this.log(`Found ${filteredPlaylists.length} playlists`);
+      
+      if (filteredPlaylists.length === 0) {
+        throw new Error(`Playlist "${playlist.name}" was not found`);
+      }
+
+      const playlistItem = filteredPlaylists[0];
+      this.log("Playlist item:", playlistItem);
+
+      // Navigate into the playlist
+      const playlistDetailsResult = await browseAndLoadItemLevel(
+        browse,
+        "playlists",
+        playlistItem.item_key,
+        1
+      );
+      this.log("[PLAYLIST-STEP2] Playlist details:", playlistDetailsResult);
+
+      const playPlaylistItem = playlistDetailsResult.items.find(
+        (i) => i.title === "Play Playlist"
+      );
+      if (!playPlaylistItem) {
+        throw new Error("'Play Playlist' action was not found in playlist menu");
+      }
+
+      // Get play mode options
+      const playOptionsResult = await browseAndLoadItemLevel(
+        browse,
+        "playlists",
+        playPlaylistItem.item_key,
+        2
+      );
+      this.log("[PLAYLIST-STEP3] Play options:", playOptionsResult);
+
+      const playNowItem = playOptionsResult.items.find(
+        (i) => i.title === "Play Now"
+      );
+      if (!playNowItem) {
+        throw new Error("'Play Now' option was not found in play modes");
+      }
+
+      // Ensure that the zone exists before attempting to send the command
+      if (!this.zone || !this.zone.zone_id) {
+        throw new Error("Current zone is not available");
+      }
+
+      // Execute the play action
+      await browseZoneOrOutput(
+        browse,
+        "playlists",
+        this.getData().id,
+        playNowItem.item_key
+      );
+      
+      this.log("===== PLAYLIST ACTION END =====");
+    } catch (error) {
+      this.error((error && error.message) || error);
+      this.log("===== PLAYLIST ACTION ERROR =====");
+      throw error;
     }
-
-    const { core } = this.homey.app;
-    const browse = new RoonApiBrowse(core);
-
-    if (!browse) {
-      this.error("Browse instance is not available");
-      return;
-    }
-
-    // we cannot trust this number so let's just search again for the artist
-    const playlists = await browseAndLoadAllHierarchy(browse, "playlists");
-    playlists.items = playlists.items.filter((a) =>
-      a.title.toLowerCase().includes(playlist.name.toLowerCase()),
-    );
-    this.log(`found ${playlists.items.length} playlists`);
-    if (playlists.items.length === 0) {
-      this.error(`Playlist ${playlist} was not found`);
-      return;
-    }
-
-    const playlistItem = playlists.items[0];
-    this.log("item: ", playlistItem);
-
-    browse.browse(
-      { hierarchy: "playlists", item_key: playlistItem.item_key },
-      (error, body) => {
-        if (error) {
-          this.error(error);
-        }
-        this.log("browse", body);
-        // body:
-        // {
-        //   action: 'list',
-        //   list: {
-        //     level: 1,
-        //     title: 'Abbaba Soul',
-        //     subtitle: '1 Album',
-        //     image_key: '30a6939e65742b638ebf00d0c80d9958',
-        //     count: 2,
-        //     display_offset: null
-        //   }
-        // }
-
-        //
-        browse.load(
-          { hierarchy: "playlists", level: 1, count: +body.count },
-          (error2, body2) => {
-            if (error2) {
-              this.error(error2);
-            }
-            this.log("load2", body2);
-            // load2:
-            // {
-            //   items: [
-            //     {
-            //       title: 'Play Artist',
-            //       subtitle: null,
-            //       image_key: null,
-            //       item_key: '8:0',
-            //       hint: 'action_list'
-            //     },
-            //     {
-            //       title: 'Babylon Kingdom Fall',
-            //       subtitle: 'Abbaba Soul / Mad Professor',
-            //       image_key: '9349f5955847b82c506951429008264a',
-            //       item_key: '8:1',
-            //       hint: 'list'
-            //     }
-            //   ],
-            //       offset: 0,
-            //     list: {
-            //   level: 1,
-            //       title: 'Abbaba Soul',
-            //       subtitle: '1 Album',
-            //       image_key: '30a6939e65742b638ebf00d0c80d9958',
-            //       count: 2,
-            //       display_offset: null
-            // }
-            // }
-
-            const playPlaylistItem = body2.items.find(
-              (i) => i.title === "Play Playlist",
-            );
-
-            if (!playPlaylistItem) {
-              this.error("Play Playlist Item was not found");
-              return;
-            }
-
-            browse.browse(
-              {
-                hierarchy: "playlists",
-                item_key: playPlaylistItem.item_key,
-              },
-              (error3, body3) => {
-                if (error3) {
-                  this.error(error3);
-                }
-                this.log("browse3", body3);
-                // browse3:
-                // {
-                //   action: 'list',
-                //       list: {
-                //   level: 2,
-                //       title: 'Play Artist',
-                //       subtitle: null,
-                //       image_key: null,
-                //       count: 2,
-                //       display_offset: null,
-                //       hint: 'action_list'
-                // }
-                // }
-
-                browse.load(
-                  { hierarchy: "playlists", level: 2, count: +body3.count },
-                  (error4, body4) => {
-                    if (error4) {
-                      this.error(error4);
-                    }
-                    this.log("load4", body4);
-                    // load4 {
-                    //   items: [
-                    //     {
-                    //       title: 'Play Now',
-                    //       subtitle: null,
-                    //       image_key: null,
-                    //       item_key: '64:0',
-                    //       hint: 'action'
-                    //     },
-                    //     {
-                    //       title: 'Shuffle',
-                    //       subtitle: null,
-                    //       image_key: null,
-                    //       item_key: '64:1',
-                    //       hint: 'action'
-                    //     },
-                    //     {
-                    //       title: 'Add Next',
-                    //       subtitle: null,
-                    //       image_key: null,
-                    //       item_key: '64:2',
-                    //       hint: 'action'
-                    //     },
-                    //     {
-                    //       title: 'Queue',
-                    //       subtitle: null,
-                    //       image_key: null,
-                    //       item_key: '64:3',
-                    //       hint: 'action'
-                    //     },
-                    //     {
-                    //       title: 'Start Radio',
-                    //       subtitle: null,
-                    //       image_key: null,
-                    //       item_key: '64:4',
-                    //       hint: 'action'
-                    //     }
-                    //   ],
-                    //   offset: 0,
-                    //   list: {
-                    //     level: 2,
-                    //     title: 'Play Playlist',
-                    //     subtitle: null,
-                    //     image_key: null,
-                    //     count: 5,
-                    //     display_offset: null,
-                    //     hint: 'action_list'
-                    //   }
-
-                    const startPlaylistItem = body4.items.find(
-                      (i) => i.title === "Play Now",
-                    );
-
-                    if (!startPlaylistItem) {
-                      this.error("Play Playlist was not found");
-                      return;
-                    }
-
-                    this.log("the title: ", startPlaylistItem.title);
-                    this.log("the item key:", startPlaylistItem.item_key);
-
-                    // start playing the artist
-                    browse.browse(
-                      {
-                        hierarchy: "playlists",
-                        zone_or_output_id: this.getData().id,
-                        item_key: startPlaylistItem.item_key,
-                      },
-                      (error5, body5) => {
-                        if (error5) {
-                          this.error(error5);
-                        }
-                        this.log("browse5", body5);
-                        // browse5:
-                        // {
-                        //   action: 'list',
-                        //       list: {
-                        //   level: 1,
-                        //       title: 'Abbaba Soul',
-                        //       subtitle: '1 Album',
-                        //       image_key: '30a6939e65742b638ebf00d0c80d9958',
-                        //       count: 2,
-                        //       display_offset: null
-                        // }
-                        // }
-                      },
-                    );
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
-    );
   }
 
   async onRegisterArgumentAutocompleteListenerGenre(query, args) {
-    this.log(`autocompleting genres: ${query} ${query.length} `);
-
-    const { core } = this.homey.app;
-    const browse = new RoonApiBrowse(core);
-
-    if (!browse) {
-      this.error("Browse instance is not available");
-      return;
-    }
-
-    this.log(`Loading all genres`);
-    const genres = await browseAndLoadAllHierarchy(browse, "genres");
-
-    console.log("genres: ", genres);
-
-    // now I want to put all items in artists.items in a random order
-    // I want to provide a function to shuffle the items
-
-    genres.items = genres.items.sort(() => 0.5 - Math.random());
-
-    // Filter only if query is not empty
-    if (query.length > 0) {
-      genres.items = genres.items.filter((a) =>
-        a.title.toLowerCase().includes(query.toLowerCase()),
-      );
-    }
-
-    this.log(`found ${genres.items.length} genres`);
-    this.log("first item: ", genres.items[0]);
-    // artists.items[0]:
-    // {
-    //   action: 'list',
-    //       list: {
-    //   level: 0,
-    //       title: 'Artists',
-    //       subtitle: null,
-    //       image_key: null,
-    //       count: 584,
-    //       display_offset: null
-    // }
-
-    this.log("offset: ", genres.offset);
-    this.log("list: ", genres.list);
-    // artists.list:
-    // {
-    //   level: 0,
-    //       title: 'Artists',
-    //     subtitle: null,
-    //     image_key: null,
-    //     count: 584,
-    //     display_offset: null
-    // }
-
-    return genres.items.map((genre) => {
-      return {
-        id: genre.item_key,
-        name: genre.title,
-      };
-    });
+    return this._genericBrowseAutocomplete(query, "genres", "genres", "genre");
   }
 
   async onRunListenerGenreOutputActionCard(args, state) {
-    // artist: { id: '17:314', name: 'Lenny Kravitz' },
-    const { genre } = args;
+    try {
+      const { genre } = args;
 
-    this.log(`Play genre action - ${genre.name}`);
+      this.log("===== GENRE SHUFFLE ACTION START =====");
+      this.log(`Play genre action - ${genre.name}`);
+      this.log("Genre args:", JSON.stringify(genre, null, 2));
 
-    if (!genre || !genre.name || genre.name.length === 0) {
-      this.error("Genre is not defined");
-      return;
+      const browse = await this._validateAndGetBrowse(args, "genre");
+
+      // Re-search is required - Roon API item keys are dynamic and change between calls
+      const genresResult = await browseAndLoadAllHierarchy(browse, "genres");
+      
+      const filteredGenres = genresResult.items.filter((a) =>
+        a.title.toLowerCase().includes(genre.name.toLowerCase())
+      );
+      this.log(`Found ${filteredGenres.length} genres`);
+      
+      if (filteredGenres.length === 0) {
+        throw new Error(`Genre "${genre.name}" was not found`);
+      }
+
+      const genreItem = filteredGenres[0];
+      this.log("Genre item:", genreItem);
+
+      // Navigate into the genre
+      const genreDetailsResult = await browseAndLoadItemLevel(
+        browse,
+        "genres",
+        genreItem.item_key,
+        1
+      );
+      this.log("[GENRE-STEP2] Genre details:", genreDetailsResult);
+
+      const playGenreItem = genreDetailsResult.items.find(
+        (i) => i.title === "Play Genre"
+      );
+      if (!playGenreItem) {
+        throw new Error("'Play Genre' action was not found in genre menu");
+      }
+
+      // Get play mode options
+      const playOptionsResult = await browseAndLoadItemLevel(
+        browse,
+        "genres",
+        playGenreItem.item_key,
+        2
+      );
+      this.log("[GENRE-STEP3] Play options:", playOptionsResult);
+
+      const shuffleItem = playOptionsResult.items.find(
+        (i) => i.title === "Shuffle"
+      );
+      if (!shuffleItem) {
+        throw new Error("'Shuffle' option was not found in play modes");
+      }
+
+      // Ensure that the zone exists before attempting to send the command
+      if (!this.zone || !this.zone.zone_id) {
+        throw new Error("Current zone is not available");
+      }
+
+      // Execute the shuffle action
+      await browseZoneOrOutput(
+        browse,
+        "genres",
+        this.getData().id,
+        shuffleItem.item_key
+      );
+      
+      this.log("===== GENRE SHUFFLE ACTION END =====");
+    } catch (error) {
+      this.error((error && error.message) || error);
+      this.log("===== GENRE SHUFFLE ACTION ERROR =====");
+      throw error;
     }
-
-    const { core } = this.homey.app;
-    const browse = new RoonApiBrowse(core);
-
-    if (!browse) {
-      this.error("Browse instance is not available");
-      return;
-    }
-
-    // we cannot trust this number so let's just search again for the artist
-    const genres = await browseAndLoadAllHierarchy(browse, "genres");
-    genres.items = genres.items.filter((a) =>
-      a.title.toLowerCase().includes(genre.name.toLowerCase()),
-    );
-    console.log(`found ${genres.items.length} genres`);
-    if (genres.items.length === 0) {
-      this.error(`Genre ${genre} was not found`);
-      return;
-    }
-
-    const genreItem = genres.items[0];
-    this.log("item: ", genreItem);
-
-    browse.browse(
-      { hierarchy: "genres", item_key: genreItem.item_key },
-      (error, body) => {
-        if (error) {
-          this.error(error);
-        }
-        this.log("browse", body);
-        // body:
-        // {
-        //   action: 'list',
-        //   list: {
-        //     level: 1,
-        //     title: 'Abbaba Soul',
-        //     subtitle: '1 Album',
-        //     image_key: '30a6939e65742b638ebf00d0c80d9958',
-        //     count: 2,
-        //     display_offset: null
-        //   }
-        // }
-
-        //
-        browse.load(
-          { hierarchy: "genres", level: 1, count: +body.count },
-          (error2, body2) => {
-            if (error2) {
-              this.error(error2);
-            }
-            this.log("load2", body2);
-            // load2:
-            // {
-            //   items: [
-            //     {
-            //       title: 'Play Genre',
-            //       subtitle: null,
-            //       image_key: null,
-            //       item_key: '8:0',
-            //       hint: 'action_list'
-            //     },
-            //     {
-
-            const playArtistItem = body2.items.find(
-              (i) => i.title === "Play Genre",
-            );
-
-            if (!playArtistItem) {
-              this.error("Play Genre Item was not found");
-              return;
-            }
-
-            browse.browse(
-              {
-                hierarchy: "genres",
-                item_key: playArtistItem.item_key,
-              },
-              (error3, body3) => {
-                if (error3) {
-                  this.error(error3);
-                }
-                this.log("browse3", body3);
-                // browse3 {
-                //   action: 'list',
-                //   list: {
-                //     level: 2,
-                //     title: 'Play Genre',
-                //     subtitle: null,
-                //     image_key: null,
-                //     count: 2,
-                //     display_offset: null,
-                //     hint: 'action_list'
-                //   }
-                // }
-                //
-
-                browse.load(
-                  { hierarchy: "genres", level: 2, count: +body3.count },
-                  (error4, body4) => {
-                    if (error4) {
-                      this.error(error4);
-                    }
-                    this.log("load4", body4);
-                    // load4:
-                    // {
-                    //   items: [
-                    //     {
-                    //       title: 'Shuffle',
-                    //       subtitle: null,
-                    //       image_key: null,
-                    //       item_key: '9:0',
-                    //       hint: 'action'
-                    //     },
-                    //     {
-                    //       title: 'Start Radio',
-                    //       subtitle: null,
-                    //       image_key: null,
-                    //       item_key: '9:1',
-                    //       hint: 'action'
-                    //     }
-                    //   ],
-                    //       offset: 0,
-                    //     list: {
-                    //   level: 2,
-                    //       title: 'Play Artist',
-                    //       subtitle: null,
-                    //       image_key: null,
-                    //       count: 2,
-                    //       display_offset: null,
-                    //       hint: 'action_list'
-                    // }
-                    // }
-
-                    const startGenreItem = body4.items.find(
-                      (i) => i.title === "Shuffle",
-                    );
-
-                    if (!startGenreItem) {
-                      this.error("Shuffle was not found");
-                      return;
-                    }
-
-                    this.log("the title: ", startGenreItem.title);
-                    this.log("the item key:", startGenreItem.item_key);
-
-                    // start playing the artist
-                    browse.browse(
-                      {
-                        hierarchy: "genres",
-                        zone_or_output_id: this.getData().id,
-                        item_key: startGenreItem.item_key,
-                      },
-                      (error5, body5) => {
-                        if (error5) {
-                          this.error(error5);
-                        }
-                        this.log("browse5", body5);
-                        // browse5:
-                        // {
-                        //   action: 'list',
-                        //       list: {
-                        //   level: 1,
-                        //       title: 'Abbaba Soul',
-                        //       subtitle: '1 Album',
-                        //       image_key: '30a6939e65742b638ebf00d0c80d9958',
-                        //       count: 2,
-                        //       display_offset: null
-                        // }
-                        // }
-                      },
-                    );
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
-    );
   }
 }
 

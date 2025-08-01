@@ -10,11 +10,11 @@
         "de": "Ruhemodus"
       },
       "titleFormatted": {
-        "en": "Set [[device]] to sleep",
-        "nl": "Zet [[device]] uit",
-        "es": "Poner [[device]] en modo dormir",
-        "fr": "Mettre [[device]] en veille",
-        "de": "[[device]] in Ruhemodus versetzen"
+        "en": "Set to sleep",
+        "nl": "Zet uit",
+        "es": "Poner en modo dormir",
+        "fr": "Mettre en veille",
+        "de": "In Ruhemodus versetzen"
       }
     },
     {
@@ -27,11 +27,11 @@
         "de": "Aktivieren"
       },
       "titleFormatted": {
-        "en": "Wake up [[device]]",
-        "nl": "Zet [[device]] aan",
-        "es": "Activar [[device]]",
-        "fr": "Réveiller [[device]]",
-        "de": "[[device]] aktivieren"
+        "en": "Wake up",
+        "nl": "Zet aan",
+        "es": "Activar",
+        "fr": "Réveiller",
+        "de": "Aktivieren"
       }
     },
     {
