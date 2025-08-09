@@ -2,7 +2,6 @@
 
 const Homey = require("homey");
 
-const zoneManager = require("../../lib/zone-manager");
 
 class RoonZoneDriver extends Homey.Driver {
   /**
@@ -41,6 +40,7 @@ class RoonZoneDriver extends Homey.Driver {
    * This should return an array with the data of devices that are available for pairing.
    */
   async onPairListDevices() {
+    const zoneManager = this.homey.app.getZoneManager();
     const transport = zoneManager.getTransport();
 
     if (transport == null) {

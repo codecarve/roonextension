@@ -2,7 +2,6 @@
 
 const Homey = require("homey");
 
-const zoneManager = require("../../lib/zone-manager");
 const imageUtil = require("../../lib/image-util");
 
 const {
@@ -15,6 +14,7 @@ class RoonOutputDevice extends Homey.Device {
   async onInit() {
     this.zone = null;
     this.browse = null;
+    this.zoneManager = this.homey.app.getZoneManager();
 
     this.currentImageKey = "";
     const data = this.getData();
@@ -32,11 +32,11 @@ class RoonOutputDevice extends Homey.Device {
     this.log("Album art image created");
 
     this._boundOnZonesUpdated = this.onZonesUpdated.bind(this);
-    zoneManager.on("zonesUpdated", this._boundOnZonesUpdated);
+    this.zoneManager.on("zonesUpdated", this._boundOnZonesUpdated);
     this._boundOnZonesChanged = this.onZonesChanged.bind(this);
-    zoneManager.on("zonesChanged", this._boundOnZonesChanged);
+    this.zoneManager.on("zonesChanged", this._boundOnZonesChanged);
     this._boundOnZonesSeekChanged = this.onZonesSeekChanged.bind(this);
-    zoneManager.on("zonesSeekChanged", this._boundOnZonesSeekChanged);
+    this.zoneManager.on("zonesSeekChanged", this._boundOnZonesSeekChanged);
 
     const capabilityListeners = [
       { cap: "speaker_playing", handler: this.onCapabilitySpeakerPlaying },
@@ -60,7 +60,7 @@ class RoonOutputDevice extends Homey.Device {
     });
 
     // now we want the state of the output to be updated
-    const transport = zoneManager.getTransport();
+    const transport = this.zoneManager.getTransport();
     if (transport !== null) {
       this.zone = transport.zone_by_output_id(this.getData().id);
       if (this.zone !== null) {
@@ -84,9 +84,9 @@ class RoonOutputDevice extends Homey.Device {
   }
 
   async onDeleted() {
-    zoneManager.off("zonesUpdated", this._boundOnZonesUpdated);
-    zoneManager.off("zonesChanged", this._boundOnZonesChanged);
-    zoneManager.off("zonesSeekChanged", this._boundOnZonesSeekChanged);
+    this.zoneManager.off("zonesUpdated", this._boundOnZonesUpdated);
+    this.zoneManager.off("zonesChanged", this._boundOnZonesChanged);
+    this.zoneManager.off("zonesSeekChanged", this._boundOnZonesSeekChanged);
 
     this.log("RoonOutputDevice has been deleted");
   }
@@ -201,7 +201,7 @@ class RoonOutputDevice extends Homey.Device {
           }
 
           try {
-            const imageDriver = zoneManager.getImageDriver();
+            const imageDriver = this.zoneManager.getImageDriver();
 
             if (imageDriver && zone && zone.now_playing) {
               const newImageKey = zone.now_playing.image_key;
@@ -273,7 +273,7 @@ class RoonOutputDevice extends Homey.Device {
     const action = value ? "play" : "pause";
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerPlaying - Transport is not available");
         return;
@@ -299,7 +299,7 @@ class RoonOutputDevice extends Homey.Device {
     this.log("onCapabilitySpeakerShuffle", value, opts);
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerShuffle - Transport is not available");
         return;
@@ -342,7 +342,7 @@ class RoonOutputDevice extends Homey.Device {
     const loop = loopMap[value] || "disabled";
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerRepeat - Transport is not available");
         return;
@@ -371,7 +371,7 @@ class RoonOutputDevice extends Homey.Device {
     this.log("onCapabilitySpeakerNext", value, opts);
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerNext - Transport is not available");
         return;
@@ -394,7 +394,7 @@ class RoonOutputDevice extends Homey.Device {
     this.log("onCapabilitySpeakerPrevious", value, opts);
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("Transport is not available");
         return;
@@ -417,7 +417,7 @@ class RoonOutputDevice extends Homey.Device {
     this.log("onCapabilitySpeakerPosition", value, opts);
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerPosition - Transport is not available");
         return;
@@ -437,7 +437,7 @@ class RoonOutputDevice extends Homey.Device {
   };
 
   changeVolume = async (direction) => {
-    const transport = zoneManager.getTransport();
+    const transport = this.zoneManager.getTransport();
     if (!transport) {
       this.error("changeVolume - Transport is not available");
       return;
@@ -499,7 +499,7 @@ class RoonOutputDevice extends Homey.Device {
   onCapabilityVolumeMute = async (value, opts) => {
     this.log("onCapabilityVolumeMute", value, opts);
 
-    const transport = zoneManager.getTransport();
+    const transport = this.zoneManager.getTransport();
     if (!transport) {
       this.error("onCapabilityVolumeMute - Transport is not available");
       return;
@@ -551,7 +551,7 @@ class RoonOutputDevice extends Homey.Device {
   onCapabilityVolumeSet = async (value, opts) => {
     this.log("onCapabilityVolumeSet", value, opts);
 
-    const transport = zoneManager.getTransport();
+    const transport = this.zoneManager.getTransport();
     if (!transport) {
       this.error("onCapabilityVolumeSet - Transport is not available");
       return;
@@ -632,7 +632,7 @@ class RoonOutputDevice extends Homey.Device {
     this.log("onCapabilitySpeakerWakeUp", value, opts);
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerWakeUp - Transport is not available");
         return;
@@ -655,7 +655,7 @@ class RoonOutputDevice extends Homey.Device {
     this.log("onCapabilitySpeakerSleep", value, opts);
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilitySpeakerSleep - Transport is not available");
         return;
@@ -678,7 +678,7 @@ class RoonOutputDevice extends Homey.Device {
     this.log("onCapabilityAutoRadio", value, opts);
 
     try {
-      const transport = zoneManager.getTransport();
+      const transport = this.zoneManager.getTransport();
       if (!transport) {
         this.error("onCapabilityAutoRadio - Transport is not available");
         return;

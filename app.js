@@ -8,7 +8,7 @@ const RoonApiTransport = require("node-roon-api-transport");
 const RoonApiImage = require("node-roon-api-image");
 const RoonApiBrowse = require("node-roon-api-browse");
 
-const zoneManager = require("./lib/zone-manager");
+const ZoneManager = require("./lib/zone-manager");
 
 // Constants for delays and timeouts
 const GLOBAL_OP_DELAY_MS = 150;
@@ -25,11 +25,12 @@ class RoonApp extends Homey.App {
     this.imageDriver = null;
     this.unsubscribe = null;
     this.browse = null;
+    this.zoneManager = new ZoneManager();
 
     this.log("RoonApp has been initialized");
 
     // Set up zone manager logger
-    zoneManager.setLogger(this.log.bind(this));
+    this.zoneManager.setLogger(this.log.bind(this));
 
     const corePairedTrigger = this.homey.flow.getTriggerCard("core_paired");
     const coreUnpairedTrigger = this.homey.flow.getTriggerCard("core_unpaired");
@@ -54,12 +55,12 @@ class RoonApp extends Homey.App {
 
           this.unsubscribe = this.transport.subscribe_zones(
             (response, data) => {
-              zoneManager.updateZones(response, data);
+              this.zoneManager.updateZones(response, data);
             },
           );
 
-          zoneManager.updateTransport(this.transport);
-          zoneManager.updateImageDriver(this.imageDriver);
+          this.zoneManager.updateTransport(this.transport);
+          this.zoneManager.updateImageDriver(this.imageDriver);
         } catch (error) {
           this.error("Error handling core pairing", error);
         }
@@ -88,8 +89,8 @@ class RoonApp extends Homey.App {
           }
 
           // Clear zone manager references
-          zoneManager.updateTransport(null);
-          zoneManager.updateImageDriver(null);
+          this.zoneManager.updateTransport(null);
+          this.zoneManager.updateImageDriver(null);
 
           // Now null the service references
           this.core = null;
@@ -174,7 +175,7 @@ class RoonApp extends Homey.App {
     // Add small delay to allow any pending operations to settle
     await new Promise((resolve) => setTimeout(resolve, GLOBAL_OP_DELAY_MS));
 
-    const zones = Object.values(zoneManager.zones);
+    const zones = Object.values(this.zoneManager.zones);
     const mutePromises = [];
 
     for (const zone of zones) {
@@ -233,7 +234,7 @@ class RoonApp extends Homey.App {
     // Add small delay to allow any pending operations to settle
     await new Promise((resolve) => setTimeout(resolve, GLOBAL_OP_DELAY_MS));
 
-    const zones = Object.values(zoneManager.zones);
+    const zones = Object.values(this.zoneManager.zones);
     const pausePromises = [];
 
     for (const zone of zones) {
@@ -283,7 +284,7 @@ class RoonApp extends Homey.App {
     await new Promise((resolve) => setTimeout(resolve, GLOBAL_OP_DELAY_MS));
 
     // Get all outputs from all zones
-    const zones = Object.values(zoneManager.zones);
+    const zones = Object.values(this.zoneManager.zones);
     const outputs = [];
 
     for (const zone of zones) {
@@ -332,6 +333,10 @@ class RoonApp extends Homey.App {
       `Sleep all operation completed. Success: ${successCount}, Errors: ${errorCount}`,
     );
     return true;
+  }
+
+  getZoneManager() {
+    return this.zoneManager;
   }
 
   async playQueue(device) {
