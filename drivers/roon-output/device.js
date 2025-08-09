@@ -233,37 +233,80 @@ class RoonOutputDevice extends Homey.Device {
   onZonesChanged = async (zones) => {
     this.log("onZonesChanged");
     await this.updateZones(zones);
+
+    // Track grouping status for this output
+    const myOutputId = this.getData().id;
+    let groupStatus = {
+      isGrouped: false,
+      groupSize: 1,
+      isPrimary: false,
+    };
+
+    for (const zone of zones) {
+      const outputIndex = zone.outputs?.findIndex(
+        (o) => o.output_id === myOutputId,
+      );
+      if (outputIndex !== -1) {
+        groupStatus.isGrouped = zone.outputs.length > 1;
+        groupStatus.groupSize = zone.outputs.length;
+        groupStatus.isPrimary = outputIndex === 0;
+        break;
+      }
+    }
+
+    // Store for potential UI updates
+    await this.setStoreValue("group_status", groupStatus).catch(this.error);
+
+    // Update device subtitle if supported
+    if (groupStatus.isGrouped) {
+      const subtitle = groupStatus.isPrimary
+        ? `Primary in group of ${groupStatus.groupSize}`
+        : `Grouped (${groupStatus.groupSize} outputs)`;
+      // Note: setSubtitle may not be available in all Homey versions
+      if (typeof this.setSubtitle === "function") {
+        await this.setSubtitle(subtitle).catch(this.error);
+      }
+    } else {
+      if (typeof this.setSubtitle === "function") {
+        await this.setSubtitle(null).catch(this.error);
+      }
+    }
   };
 
   onZonesSeekChanged = async (zones_seek_changed) => {
-    if (!this.zone) {
+    if (
+      !this.zone ||
+      !zones_seek_changed ||
+      !Array.isArray(zones_seek_changed)
+    ) {
       return;
     }
 
     for (let zone of zones_seek_changed) {
-      if (zone.zone_id === this.zone.zone_id) {
-        if (zone.seek_position !== undefined) {
-          await this.setCapabilityValue(
-            "speaker_position",
-            zone.seek_position,
-          ).catch((err) =>
-            this.error(
-              `onZonesChanged - Error setting speaker_position! Error: ${err.message}`,
-            ),
-          );
-        }
-        if (zone.queue_time_remaining !== undefined) {
-          await this.setCapabilityValue(
-            "speaker_queue_time_remaining",
-            zone.queue_time_remaining,
-          ).catch((err) =>
-            this.error(
-              `onZonesChanged -Error setting speaker_queue_time_remaining! Error: ${err.message}`,
-            ),
-          );
-        }
-        break;
+      if (!zone || zone.zone_id !== this.zone.zone_id) {
+        continue;
       }
+      if (zone.seek_position !== undefined) {
+        await this.setCapabilityValue(
+          "speaker_position",
+          zone.seek_position,
+        ).catch((err) =>
+          this.error(
+            `onZonesChanged - Error setting speaker_position! Error: ${err.message}`,
+          ),
+        );
+      }
+      if (zone.queue_time_remaining !== undefined) {
+        await this.setCapabilityValue(
+          "speaker_queue_time_remaining",
+          zone.queue_time_remaining,
+        ).catch((err) =>
+          this.error(
+            `onZonesChanged - Error setting speaker_queue_time_remaining! Error: ${err.message}`,
+          ),
+        );
+      }
+      break;
     }
   };
 
@@ -1088,6 +1131,58 @@ class RoonOutputDevice extends Homey.Device {
       this.log("===== GENRE SHUFFLE ACTION ERROR =====");
       throw error;
     }
+  }
+
+  async onRegisterArgumentAutocompleteListenerGroupWithOutput(query) {
+    const zoneManager = this.homey.app.getZoneManager();
+    const myOutputId = this.getData().id;
+
+    const compatible = zoneManager.getCompatibleOutputs(myOutputId);
+    const results = [];
+
+    for (const item of compatible) {
+      if (
+        item.output.display_name.toLowerCase().includes(query.toLowerCase())
+      ) {
+        results.push({
+          name: item.output.display_name,
+          id: item.output.output_id,
+        });
+      }
+    }
+
+    return results.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async onRegisterArgumentAutocompleteListenerTransferPlayback(query) {
+    const zoneManager = this.homey.app.getZoneManager();
+    const results = [];
+
+    // Add all outputs except self
+    const myOutputId = this.getData().id;
+
+    for (const zone of Object.values(zoneManager.zones)) {
+      // Add individual outputs only (no zones)
+      for (const output of zone.outputs || []) {
+        if (output.output_id !== myOutputId) {
+          if (output.display_name.toLowerCase().includes(query.toLowerCase())) {
+            // Check if we already added this output (in case it appears in multiple zones)
+            if (!results.find((r) => r.id === output.output_id)) {
+              results.push({
+                name: output.display_name,
+                id: output.output_id,
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // Remove duplicates and sort
+    const unique = Array.from(
+      new Map(results.map((item) => [item.id, item])).values(),
+    );
+    return unique.sort((a, b) => a.name.localeCompare(b.name));
   }
 }
 

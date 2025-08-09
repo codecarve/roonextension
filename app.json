@@ -190,6 +190,85 @@
     "actions": [
       {
         "title": {
+          "en": "Group with output",
+          "nl": "Groepeer met uitgang",
+          "es": "Agrupar con salida",
+          "fr": "Grouper avec sortie",
+          "de": "Mit Ausgang gruppieren"
+        },
+        "titleFormatted": {
+          "en": "Group output with [[target]]",
+          "nl": "Groepeer uitgang met [[target]]",
+          "es": "Agrupar salida con [[target]]",
+          "fr": "Grouper sortie avec [[target]]",
+          "de": "Ausgang mit [[target]] gruppieren"
+        },
+        "hint": {
+          "en": "Groups this output with another output. If target is already grouped, this device joins that group.",
+          "nl": "Groepeert deze uitgang met een andere uitgang. Als het doel al gegroepeerd is, voegt dit apparaat zich bij die groep.",
+          "es": "Agrupa esta salida con otra salida. Si el objetivo ya está agrupado, este dispositivo se une a ese grupo.",
+          "fr": "Groupe cette sortie avec une autre sortie. Si la cible est déjà groupée, cet appareil rejoint ce groupe.",
+          "de": "Gruppiert diesen Ausgang mit einem anderen Ausgang. Wenn das Ziel bereits gruppiert ist, tritt dieses Gerät dieser Gruppe bei."
+        },
+        "platforms": [
+          "local"
+        ],
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=roon-output"
+          },
+          {
+            "name": "target",
+            "type": "autocomplete",
+            "placeholder": {
+              "en": "Select output...",
+              "nl": "Selecteer uitgang...",
+              "es": "Seleccionar salida...",
+              "fr": "Sélectionner sortie...",
+              "de": "Ausgang wählen..."
+            }
+          }
+        ],
+        "id": "group_with_output"
+      },
+      {
+        "title": {
+          "en": "Leave group",
+          "nl": "Verlaat groep",
+          "es": "Salir del grupo",
+          "fr": "Quitter le groupe",
+          "de": "Gruppe verlassen"
+        },
+        "titleFormatted": {
+          "en": "Remove this output from its current group",
+          "nl": "Verwijder deze uitgang uit zijn huidige groep",
+          "es": "Eliminar esta salida de su grupo actual",
+          "fr": "Retirer cette sortie de son groupe actuel",
+          "de": "Diesen Ausgang aus seiner aktuellen Gruppe entfernen"
+        },
+        "hint": {
+          "en": "Removes this output from its current group. Does nothing if not grouped.",
+          "nl": "Verwijdert deze uitgang uit zijn huidige groep. Doet niets als niet gegroepeerd.",
+          "es": "Elimina esta salida de su grupo actual. No hace nada si no está agrupado.",
+          "fr": "Retire cette sortie de son groupe actuel. Ne fait rien si pas groupé.",
+          "de": "Entfernt diesen Ausgang aus seiner aktuellen Gruppe. Tut nichts, wenn nicht gruppiert."
+        },
+        "platforms": [
+          "local"
+        ],
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=roon-output"
+          }
+        ],
+        "id": "leave_group"
+      },
+      {
+        "title": {
           "en": "Mute All Zones",
           "nl": "Demp alle zones",
           "es": "Silenciar Todas las Zonas",
@@ -290,6 +369,51 @@
           "de": "Versetzt alle Audio-Ausgänge nacheinander in den Standby-Modus. Dies schaltet alle angeschlossenen Geräte aus, die Standby unterstützen."
         },
         "id": "sleep_all"
+      },
+      {
+        "title": {
+          "en": "Transfer playback to",
+          "nl": "Draag afspelen over naar",
+          "es": "Transferir reproducción a",
+          "fr": "Transférer la lecture vers",
+          "de": "Wiedergabe übertragen an"
+        },
+        "titleFormatted": {
+          "en": "Transfer playback to [[target]]",
+          "nl": "Draag afspelen over naar [[target]]",
+          "es": "Transferir reproducción a [[target]]",
+          "fr": "Transférer la lecture vers [[target]]",
+          "de": "Wiedergabe an [[target]] übertragen"
+        },
+        "hint": {
+          "en": "Moves the current playback queue to another zone or output.",
+          "nl": "Verplaatst de huidige afspeelwachtrij naar een andere zone of uitgang.",
+          "es": "Mueve la cola de reproducción actual a otra zona o salida.",
+          "fr": "Déplace la file de lecture actuelle vers une autre zone ou sortie.",
+          "de": "Verschiebt die aktuelle Wiedergabewarteschlange in eine andere Zone oder Ausgabe."
+        },
+        "platforms": [
+          "local"
+        ],
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=roon-output|roon-zone"
+          },
+          {
+            "name": "target",
+            "type": "autocomplete",
+            "placeholder": {
+              "en": "Select destination...",
+              "nl": "Selecteer bestemming...",
+              "es": "Seleccionar destino...",
+              "fr": "Sélectionner destination...",
+              "de": "Ziel wählen..."
+            }
+          }
+        ],
+        "id": "transfer_playback_to"
       },
       {
         "id": "speaker_sleep",
@@ -773,13 +897,9 @@
       "title": {
         "en": "Repeat",
         "nl": "Herhalen",
-        "da": "Gentag",
         "de": "Wiederholen",
         "es": "Repetir",
-        "fr": "Répéter",
-        "it": "Ripeti",
-        "no": "Gjenta",
-        "sv": "Upprepa"
+        "fr": "Répéter"
       },
       "type": "enum",
       "values": [
@@ -788,13 +908,9 @@
           "title": {
             "en": "Off",
             "nl": "Uit",
-            "da": "Fra",
             "de": "Aus",
             "es": "Apagado",
-            "fr": "Désactivé",
-            "it": "Spento",
-            "no": "Av",
-            "sv": "Av"
+            "fr": "Désactivé"
           }
         },
         {
@@ -802,13 +918,9 @@
           "title": {
             "en": "Repeat Track",
             "nl": "Nummer herhalen",
-            "da": "Gentag nummer",
             "de": "Titel wiederholen",
             "es": "Repetir pista",
-            "fr": "Répéter la piste",
-            "it": "Ripeti traccia",
-            "no": "Gjenta spor",
-            "sv": "Upprepa spår"
+            "fr": "Répéter la piste"
           }
         },
         {
@@ -816,19 +928,15 @@
           "title": {
             "en": "Repeat Playlist",
             "nl": "Afspeellijst herhalen",
-            "da": "Gentag afspilningsliste",
             "de": "Wiedergabeliste wiederholen",
             "es": "Repetir lista de reproducción",
-            "fr": "Répéter la playlist",
-            "it": "Ripeti playlist",
-            "no": "Gjenta spilleliste",
-            "sv": "Upprepa spellista"
+            "fr": "Répéter la playlist"
           }
         }
       ],
       "getable": true,
       "setable": true,
-      "uiComponent": "picker",
+      "uiComponent": null,
       "insights": false,
       "icon": "/assets/speaker_repeat.svg"
     },

@@ -1,1 +1,30 @@
-{}
+{
+  "errors": {
+    "transport_not_available": "Roon Core n'est pas connecté",
+    "output_not_found": "Sortie audio introuvable",
+    "outputs_incompatible": "Ces sorties ne peuvent pas être groupées",
+    "grouping_failed": "Échec du regroupement",
+    "ungrouping_failed": "Échec de la sortie du groupe",
+    "transfer_failed": "Échec du transfert de lecture",
+    "invalid_target": "Cible invalide sélectionnée"
+  },
+  "flow": {
+    "group_with_output": {
+      "title": "Grouper avec sortie",
+      "titleFormatted": "Grouper avec [[target]]",
+      "hint": "Groupe cette sortie avec une autre sortie. Si la cible est déjà groupée, cet appareil rejoint ce groupe.",
+      "target_title": "Sélectionner la sortie à grouper"
+    },
+    "leave_group": {
+      "title": "Quitter le groupe",
+      "titleFormatted": "Quitter le groupe actuel",
+      "hint": "Retire cette sortie de son groupe actuel. Ne fait rien si non groupé."
+    },
+    "transfer_playback_to": {
+      "title": "Transférer la lecture vers",
+      "titleFormatted": "Transférer la lecture vers [[target]]",
+      "hint": "Déplace la file de lecture actuelle vers une autre zone ou sortie.",
+      "target_title": "Sélectionner la destination"
+    }
+  }
+}

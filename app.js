@@ -157,6 +157,140 @@ class RoonApp extends Homey.App {
     playQueueAction.registerRunListener(async (args, state) => {
       return this.playQueue(args.device);
     });
+
+    // Group with output action
+    const groupWithOutputAction =
+      this.homey.flow.getActionCard("group_with_output");
+    groupWithOutputAction.registerRunListener(async (args, state) => {
+      const device = args.device;
+      const target = args.target; // Autocomplete object with {name, id}
+      const targetId = typeof target === "string" ? target : target.id;
+
+      if (!this.transport) {
+        throw new Error(this.homey.__("errors.transport_not_available"));
+      }
+
+      try {
+        const deviceId = device.getData().id;
+
+        this.log(`Grouping device ${deviceId} with target ${targetId}`);
+
+        // Check if already grouped with the target
+        const currentZone = this.zoneManager.findZoneByOutputId(deviceId);
+        const targetZone = this.zoneManager.findZoneByOutputId(targetId);
+
+        this.log(
+          `Current zone for device: ${currentZone?.zone_id}, outputs: ${currentZone?.outputs?.length}`,
+        );
+        this.log(
+          `Target zone: ${targetZone?.zone_id}, outputs: ${targetZone?.outputs?.length}`,
+        );
+
+        if (
+          currentZone &&
+          targetZone &&
+          currentZone.zone_id === targetZone.zone_id
+        ) {
+          this.log(`Devices are already grouped together`);
+          return true;
+        }
+
+        // Check if target is already in a group
+        if (targetZone && targetZone.outputs.length > 1) {
+          // Target is grouped - we need to ungroup the target first
+          this.log(`Target is grouped, ungrouping target first...`);
+          await this.zoneManager.ungroupOutput(targetId);
+        }
+
+        // If device is in a group but target isn't, the target will be added to device's group
+        // If device is not in a group, a new group will be created
+        // The device (being acted upon) will remain the primary output
+        this.log(`Grouping with target (device remains primary)...`);
+        await this.zoneManager.groupOutputs(deviceId, targetId);
+
+        return true;
+      } catch (error) {
+        this.error(`Group with output failed: ${error.message}`);
+        throw new Error(this.homey.__("errors.grouping_failed"));
+      }
+    });
+
+    groupWithOutputAction.registerArgumentAutocompleteListener(
+      "target",
+      async (query, args) => {
+        return args.device.onRegisterArgumentAutocompleteListenerGroupWithOutput(
+          query,
+        );
+      },
+    );
+
+    // Leave group action
+    const leaveGroupAction = this.homey.flow.getActionCard("leave_group");
+    leaveGroupAction.registerRunListener(async (args, state) => {
+      const device = args.device;
+
+      if (!this.transport) {
+        throw new Error(this.homey.__("errors.transport_not_available"));
+      }
+
+      try {
+        const result = await this.zoneManager.ungroupOutput(
+          device.getData().id,
+        );
+
+        if (!result.wasGrouped) {
+          this.log("Device was not grouped, no action taken");
+        }
+
+        return true;
+      } catch (error) {
+        this.error(`Leave group failed: ${error.message}`);
+        throw new Error(this.homey.__("errors.ungrouping_failed"));
+      }
+    });
+
+    // Transfer playback action
+    const transferPlaybackAction = this.homey.flow.getActionCard(
+      "transfer_playback_to",
+    );
+    transferPlaybackAction.registerRunListener(async (args, state) => {
+      const device = args.device;
+      const target = args.target; // Autocomplete object with {name, id}
+      const targetId = typeof target === "string" ? target : target.id;
+
+      if (!this.transport) {
+        throw new Error(this.homey.__("errors.transport_not_available"));
+      }
+
+      try {
+        const fromId = device.getData().id;
+
+        // Check if source and target are the same
+        if (fromId === targetId) {
+          this.log(
+            `Transfer cancelled: source and target are the same (${fromId})`,
+          );
+          return true; // Silently succeed without doing anything
+        }
+
+        this.log(`Transferring playback from ${fromId} to ${targetId}`);
+        await this.zoneManager.transferPlayback(fromId, targetId);
+
+        return true;
+      } catch (error) {
+        this.error(`Transfer playback failed: ${error.message}`);
+        throw new Error(this.homey.__("errors.transfer_failed"));
+      }
+    });
+
+    transferPlaybackAction.registerArgumentAutocompleteListener(
+      "target",
+      async (query, args) => {
+        return args.device.onRegisterArgumentAutocompleteListenerTransferPlayback(
+          query,
+        );
+      },
+    );
   }
 
   registerFlowConditions() {
@@ -219,10 +353,18 @@ class RoonApp extends Homey.App {
       this.log(
         `Mute all completed: ${successful} successful, ${failed} failed`,
       );
-      return true;
+      // Only return true if at least some operations succeeded
+      if (successful > 0) {
+        return true;
+      } else if (failed > 0) {
+        throw new Error(`All mute operations failed (${failed} devices)`);
+      } else {
+        // No zones found
+        return true;
+      }
     } catch (error) {
       this.error("Error in mute all operation:", error);
-      return true; // Don't throw to avoid flow failure
+      throw error; // Propagate error to flow
     }
   }
 
@@ -246,13 +388,19 @@ class RoonApp extends Homey.App {
                 this.error(
                   `Failed to pause zone ${zone.display_name || zone.zone_id}: ${err}`,
                 );
-                resolve({ success: false, zone: zone.display_name || zone.zone_id });
+                resolve({
+                  success: false,
+                  zone: zone.display_name || zone.zone_id,
+                });
               } else {
                 this.log(`Paused zone: ${zone.display_name || zone.zone_id}`);
-                resolve({ success: true, zone: zone.display_name || zone.zone_id });
+                resolve({
+                  success: true,
+                  zone: zone.display_name || zone.zone_id,
+                });
               }
             });
-          })
+          }),
         );
       }
     }
@@ -264,14 +412,26 @@ class RoonApp extends Homey.App {
 
     try {
       const results = await Promise.allSettled(pausePromises);
-      const successful = results.filter((r) => r.status === "fulfilled" && r.value.success).length;
-      const failed = results.filter((r) => r.status === "fulfilled" && !r.value.success).length;
+      const successful = results.filter(
+        (r) => r.status === "fulfilled" && r.value.success,
+      ).length;
+      const failed = results.filter(
+        (r) => r.status === "fulfilled" && !r.value.success,
+      ).length;
 
       this.log(`Paused ${successful} zones, ${failed} errors`);
-      return true;
+      // Only return true if at least some operations succeeded
+      if (successful > 0) {
+        return true;
+      } else if (failed > 0) {
+        throw new Error(`All pause operations failed (${failed} zones)`);
+      } else {
+        // No playing zones found
+        return true;
+      }
     } catch (error) {
       this.error("Error in pause all operation:", error);
-      return true; // Don't throw to avoid flow failure
+      throw error; // Propagate error to flow
     }
   }
 

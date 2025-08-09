@@ -1,0 +1,42 @@
+{
+  "title": {
+    "en": "Group with output",
+    "nl": "Groepeer met uitgang",
+    "es": "Agrupar con salida",
+    "fr": "Grouper avec sortie",
+    "de": "Mit Ausgang gruppieren"
+  },
+  "titleFormatted": {
+    "en": "Group output with [[target]]",
+    "nl": "Groepeer uitgang met [[target]]",
+    "es": "Agrupar salida con [[target]]",
+    "fr": "Grouper sortie avec [[target]]",
+    "de": "Ausgang mit [[target]] gruppieren"
+  },
+  "hint": {
+    "en": "Groups this output with another output. If target is already grouped, this device joins that group.",
+    "nl": "Groepeert deze uitgang met een andere uitgang. Als het doel al gegroepeerd is, voegt dit apparaat zich bij die groep.",
+    "es": "Agrupa esta salida con otra salida. Si el objetivo ya está agrupado, este dispositivo se une a ese grupo.",
+    "fr": "Groupe cette sortie avec une autre sortie. Si la cible est déjà groupée, cet appareil rejoint ce groupe.",
+    "de": "Gruppiert diesen Ausgang mit einem anderen Ausgang. Wenn das Ziel bereits gruppiert ist, tritt dieses Gerät dieser Gruppe bei."
+  },
+  "platforms": ["local"],
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=roon-output"
+    },
+    {
+      "name": "target",
+      "type": "autocomplete",
+      "placeholder": {
+        "en": "Select output...",
+        "nl": "Selecteer uitgang...",
+        "es": "Seleccionar salida...",
+        "fr": "Sélectionner sortie...",
+        "de": "Ausgang wählen..."
+      }
+    }
+  ]
+}

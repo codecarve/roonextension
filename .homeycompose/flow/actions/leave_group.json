@@ -1,0 +1,31 @@
+{
+  "title": {
+    "en": "Leave group",
+    "nl": "Verlaat groep",
+    "es": "Salir del grupo",
+    "fr": "Quitter le groupe",
+    "de": "Gruppe verlassen"
+  },
+  "titleFormatted": {
+    "en": "Remove this output from its current group",
+    "nl": "Verwijder deze uitgang uit zijn huidige groep",
+    "es": "Eliminar esta salida de su grupo actual",
+    "fr": "Retirer cette sortie de son groupe actuel",
+    "de": "Diesen Ausgang aus seiner aktuellen Gruppe entfernen"
+  },
+  "hint": {
+    "en": "Removes this output from its current group. Does nothing if not grouped.",
+    "nl": "Verwijdert deze uitgang uit zijn huidige groep. Doet niets als niet gegroepeerd.",
+    "es": "Elimina esta salida de su grupo actual. No hace nada si no está agrupado.",
+    "fr": "Retire cette sortie de son groupe actuel. Ne fait rien si pas groupé.",
+    "de": "Entfernt diesen Ausgang aus seiner aktuellen Gruppe. Tut nichts, wenn nicht gruppiert."
+  },
+  "platforms": ["local"],
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=roon-output"
+    }
+  ]
+}

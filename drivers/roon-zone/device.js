@@ -78,7 +78,10 @@ class RoonZoneDevice extends Homey.Device {
   async onDeleted() {
     this.getZoneManager().off("zonesUpdated", this._boundOnZonesUpdated);
     this.getZoneManager().off("zonesChanged", this._boundOnZonesChanged);
-    this.getZoneManager().off("zonesSeekChanged", this._boundOnZonesSeekChanged);
+    this.getZoneManager().off(
+      "zonesSeekChanged",
+      this._boundOnZonesSeekChanged,
+    );
     this.log("RoonZoneDevice has been deleted");
   }
 
@@ -209,27 +212,6 @@ class RoonZoneDevice extends Homey.Device {
               this.currentImageKey = newImageKey;
             }
           }
-
-          // if (imageDriver && zone && zone.now_playing) {
-          //   const newImage = zone.now_playing.image_key;
-          //   if (newImage !== this.currentImage) {
-          //     const buffer = await new Promise((resolve, reject) => {
-          //       zoneManager.getImageDriver()?.get_image(
-          //         zone.now_playing.image_key,
-          //         {
-          //           format: "image/jpeg",
-          //         },
-          //         (err, contentType, buffer) => {
-          //           if (err) return reject(err);
-          //           resolve(buffer);
-          //         },
-          //       );
-          //     });
-          //     await writeFile(this.imagePath, buffer, "binary");
-          //     await this.albumArtImage.update();
-          //     this.currentImage = newImage;
-          //   }
-          // }
         } catch (err) {
           this.error(`Error setting image. Error: ${err.message}`);
         }
@@ -251,7 +233,13 @@ class RoonZoneDevice extends Homey.Device {
   };
 
   onZonesSeekChanged = async (zones_seek_changed) => {
+    if (!zones_seek_changed || !Array.isArray(zones_seek_changed)) {
+      return;
+    }
     for (let zone of zones_seek_changed) {
+      if (!zone) {
+        continue;
+      }
       if (zone.zone_id === this.getData().id) {
         if (zone.seek_position !== undefined) {
           this.setCapabilityValue("speaker_position", zone.seek_position).catch(

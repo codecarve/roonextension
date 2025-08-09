@@ -1,1 +1,30 @@
-{}
+{
+  "errors": {
+    "transport_not_available": "Roon core is niet verbonden",
+    "output_not_found": "Audio-uitgang niet gevonden",
+    "outputs_incompatible": "Deze uitgangen kunnen niet worden gegroepeerd",
+    "grouping_failed": "Groeperen mislukt",
+    "ungrouping_failed": "Verlaten van groep mislukt",
+    "transfer_failed": "Overdracht van afspelen mislukt",
+    "invalid_target": "Ongeldig doel geselecteerd"
+  },
+  "flow": {
+    "group_with_output": {
+      "title": "Groepeer met uitgang",
+      "titleFormatted": "Groepeer met [[target]]",
+      "hint": "Groepeert deze uitgang met een andere uitgang. Als het doel al gegroepeerd is, voegt dit apparaat zich bij die groep.",
+      "target_title": "Selecteer uitgang om mee te groeperen"
+    },
+    "leave_group": {
+      "title": "Verlaat groep",
+      "titleFormatted": "Verlaat huidige groep",
+      "hint": "Verwijdert deze uitgang uit zijn huidige groep. Doet niets als niet gegroepeerd."
+    },
+    "transfer_playback_to": {
+      "title": "Draag afspelen over naar",
+      "titleFormatted": "Draag afspelen over naar [[target]]",
+      "hint": "Verplaatst de huidige afspeelwachtrij naar een andere zone of uitgang.",
+      "target_title": "Selecteer bestemming"
+    }
+  }
+}

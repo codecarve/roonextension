@@ -1,1 +1,30 @@
-{}
+{
+  "errors": {
+    "transport_not_available": "Roon Core no está conectado",
+    "output_not_found": "Salida de audio no encontrada",
+    "outputs_incompatible": "Estas salidas no se pueden agrupar",
+    "grouping_failed": "Error al agrupar",
+    "ungrouping_failed": "Error al abandonar el grupo",
+    "transfer_failed": "Error al transferir la reproducción",
+    "invalid_target": "Destino inválido seleccionado"
+  },
+  "flow": {
+    "group_with_output": {
+      "title": "Agrupar con salida",
+      "titleFormatted": "Agrupar con [[target]]",
+      "hint": "Agrupa esta salida con otra salida. Si el destino ya está agrupado, este dispositivo se une a ese grupo.",
+      "target_title": "Seleccionar salida para agrupar"
+    },
+    "leave_group": {
+      "title": "Abandonar grupo",
+      "titleFormatted": "Abandonar grupo actual",
+      "hint": "Elimina esta salida de su grupo actual. No hace nada si no está agrupado."
+    },
+    "transfer_playback_to": {
+      "title": "Transferir reproducción a",
+      "titleFormatted": "Transferir reproducción a [[target]]",
+      "hint": "Mueve la cola de reproducción actual a otra zona o salida.",
+      "target_title": "Seleccionar destino"
+    }
+  }
+}

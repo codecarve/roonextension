@@ -10,7 +10,7 @@ class RoonOutputDriver extends Homey.Driver {
    */
   async onInit() {
     this.log("RoonOutputDriver has been initialized");
-    
+
     // Set up browser util logger
     browserUtil.setLogger(this.log.bind(this));
 

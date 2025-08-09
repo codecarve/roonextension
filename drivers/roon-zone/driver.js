@@ -2,7 +2,6 @@
 
 const Homey = require("homey");
 
-
 class RoonZoneDriver extends Homey.Driver {
   /**
    * onInit is called when the driver is initialized.
