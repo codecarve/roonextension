@@ -3,6 +3,7 @@
 const Homey = require("homey");
 
 const zoneManager = require("../../lib/zone-manager");
+const browserUtil = require("../../lib/browser-util");
 
 class RoonOutputDriver extends Homey.Driver {
   /**
@@ -10,6 +11,9 @@ class RoonOutputDriver extends Homey.Driver {
    */
   async onInit() {
     this.log("RoonOutputDriver has been initialized");
+    
+    // Set up browser util logger
+    browserUtil.setLogger(this.log.bind(this));
 
     // Register flow actions for sleep and wake up
     const speakerSleepActionCard =
@@ -29,7 +33,22 @@ class RoonOutputDriver extends Homey.Driver {
       "speaker_auto_radio_output",
     );
     autoRadioAction.registerRunListener(async (args, state) => {
-      return args.device.onCapabilityAutoRadio(args.enabled, null);
+      // Backward compatibility: support both old 'enabled' and new 'onoff' parameters
+      let enabled;
+      if (args.onoff !== undefined) {
+        // New format with dropdown
+        enabled = args.onoff === "on";
+      } else if (args.enabled !== undefined) {
+        // Old format with checkbox (backward compatibility)
+        enabled = args.enabled;
+        this.log(
+          "Warning: Using deprecated 'enabled' parameter in Roon Radio flow action. Please recreate this flow.",
+        );
+      } else {
+        // Default to false if neither parameter exists
+        enabled = false;
+      }
+      return args.device.onCapabilityAutoRadio(enabled, null);
     });
 
     // Register flow action for artist radio

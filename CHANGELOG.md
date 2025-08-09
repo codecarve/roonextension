@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.13] - 2025-08-09
+
+### Changed
+
+- **Flow Card Improvements** (Based on Homey certification feedback)
+  - Roon Radio flow action now uses clearer "Turn Roon Radio on/off" format
+  - Changed parameter from checkbox (`enabled`) to dropdown (`onoff`) for better user experience
+  - "Wake Up" action renamed to "Turn on output" for clarity
+  - "Sleep" action renamed to "Turn off output" with explicit standby indication
+  - Improved all translations (EN, NL, ES, FR, DE) for consistency
+
+### Added
+
+- Backward compatibility support for existing flows using the old `enabled` parameter
+- Deprecation warnings in logs when old parameter format is detected
+
+### Fixed
+
+- Fixed incorrect log message in RoonOutputDevice deletion (was logging "RoonZone" instead of "RoonOutputDevice")
+- Fixed error message typo in speaker position capability handler
+- Enhanced volume change safety with additional null checks for zone and outputs array
+- Improved zone unsubscription handling to prevent undefined errors by keeping zones property defined
+
+### Technical Details
+
+- Added defensive checks in `changeVolume()` to validate zone and outputs before processing
+- Changed zone unsubscription to set `this.zones = {}` instead of deleting the property
+- Corrected log messages in device lifecycle methods for better debugging
+
 ## [1.1.12] - 2025-08-02
 
 ### Added

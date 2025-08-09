@@ -270,7 +270,18 @@ class RoonZoneDevice extends Homey.Device {
     this.log("onCapabilitySpeakerPlaying", value, opts);
     const action = value ? "play" : "pause";
     try {
-      zoneManager.getTransport()?.control(this.getData().id, action);
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilitySpeakerPlaying - Transport is not available");
+        return;
+      }
+      transport.control(this.getData().id, action, (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerPlaying - Control command '${action}' failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerPlaying - Setting speaker playing to ${action} failed! Error: ${err.message}`,
@@ -282,9 +293,24 @@ class RoonZoneDevice extends Homey.Device {
     this.log("onCapabilitySpeakerShuffle", value, opts);
 
     try {
-      zoneManager.getTransport()?.change_settings(this.getData().id, {
-        shuffle: value,
-      });
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilitySpeakerShuffle - Transport is not available");
+        return;
+      }
+      transport.change_settings(
+        this.getData().id,
+        {
+          shuffle: value,
+        },
+        (err) => {
+          if (err) {
+            this.error(
+              `onCapabilitySpeakerShuffle - Failed to set shuffle to ${value}: ${err}`,
+            );
+          }
+        },
+      );
     } catch (err) {
       this.error(
         `onCapabilitySpeakerShuffle - Setting shuffle to ${value} failed! Error: ${err.message}`,
@@ -304,7 +330,18 @@ class RoonZoneDevice extends Homey.Device {
     const loop = loopMap[value] || "disabled";
 
     try {
-      zoneManager.getTransport()?.change_settings(this.getData().id, { loop });
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilitySpeakerRepeat - Transport is not available");
+        return;
+      }
+      transport.change_settings(this.getData().id, { loop }, (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerRepeat - Failed to set loop to ${loop}: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerRepeat - Setting loop to ${value} failed! Error: ${err.message}`,
@@ -316,7 +353,18 @@ class RoonZoneDevice extends Homey.Device {
     this.log("onCapabilitySpeakerNext", value, opts);
 
     try {
-      zoneManager.getTransport()?.control(this.getData().id, "next");
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilitySpeakerNext - Transport is not available");
+        return;
+      }
+      transport.control(this.getData().id, "next", (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerNext - Control command 'next' failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerNext - Setting speaker playing to next failed! Error: ${err.message}`,
@@ -328,7 +376,18 @@ class RoonZoneDevice extends Homey.Device {
     this.log("onCapabilitySpeakerPrevious", value, opts);
 
     try {
-      zoneManager.getTransport()?.control(this.getData().id, "previous");
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilitySpeakerPrevious - Transport is not available");
+        return;
+      }
+      transport.control(this.getData().id, "previous", (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerPrevious - Control command 'previous' failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerPrevious - Setting speaker playing to previous failed! Error: ${err.message}`,
@@ -340,7 +399,18 @@ class RoonZoneDevice extends Homey.Device {
     this.log("onCapabilitySpeakerPosition", value, opts);
 
     try {
-      zoneManager.getTransport()?.seek(this.getData().id, "absolute", value);
+      const transport = zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilitySpeakerPosition - Transport is not available");
+        return;
+      }
+      transport.seek(this.getData().id, "absolute", value, (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerPosition - Seek to position ${value} failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerPosition - Setting speaker position ${value} failed! Error: ${err.message}`,
@@ -364,11 +434,12 @@ class RoonZoneDevice extends Homey.Device {
     }
 
     const volumeChangePromises = this.zone.outputs
-      .filter((output) =>
-        direction > 0
+      .filter((output) => {
+        if (!output.volume) return false;
+        return direction > 0
           ? +output.volume.value < +output.volume.soft_limit
-          : +output.volume.value > 0,
-      )
+          : +output.volume.value > 0;
+      })
       .map((output) => {
         return new Promise((resolve, reject) => {
           const transport = zoneManager.getTransport();
@@ -473,9 +544,19 @@ class RoonZoneDevice extends Homey.Device {
         this.error("onCapabilityAutoRadio - Transport is not available");
         return;
       }
-      transport.change_settings(this.getData().id, {
-        auto_radio: value,
-      });
+      transport.change_settings(
+        this.getData().id,
+        {
+          auto_radio: value,
+        },
+        (err) => {
+          if (err) {
+            this.error(
+              `onCapabilityAutoRadio - Failed to set auto_radio to ${value}: ${err}`,
+            );
+          }
+        },
+      );
     } catch (err) {
       this.error(
         `onCapabilityAutoRadio - Setting auto_radio to ${value} failed! Error: ${err.message}`,

@@ -10,6 +10,11 @@ const RoonApiBrowse = require("node-roon-api-browse");
 
 const zoneManager = require("./lib/zone-manager");
 
+// Constants for delays and timeouts
+const GLOBAL_OP_DELAY_MS = 150;
+const QUEUE_TIMEOUT_MS = 10000;
+const OUTPUT_SLEEP_DELAY_MS = 100;
+
 class RoonApp extends Homey.App {
   /**
    * onInit is called when the app is initialized.
@@ -23,15 +28,18 @@ class RoonApp extends Homey.App {
 
     this.log("RoonApp has been initialized");
 
+    // Set up zone manager logger
+    zoneManager.setLogger(this.log.bind(this));
+
     const corePairedTrigger = this.homey.flow.getTriggerCard("core_paired");
     const coreUnpairedTrigger = this.homey.flow.getTriggerCard("core_unpaired");
 
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.1.12",
+      display_version: "1.1.13",
       publisher: "CodeCarve",
-      email: "support@codecarve.nl",
+      email: "hello@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
       log_level: "none",
       force_server: true,
@@ -71,19 +79,23 @@ class RoonApp extends Homey.App {
         this.log("Roon Core is unpairing...");
 
         try {
-          this.core = null;
-          this.transport = null;
-          this.imageDriver = null;
-          this.browse = null;
-
+          // Unsubscribe before nulling services
           if (this.unsubscribe) {
             if (typeof this.unsubscribe === "function") {
               this.unsubscribe();
             }
             this.unsubscribe = null;
           }
+
+          // Clear zone manager references
           zoneManager.updateTransport(null);
           zoneManager.updateImageDriver(null);
+
+          // Now null the service references
+          this.core = null;
+          this.transport = null;
+          this.imageDriver = null;
+          this.browse = null;
         } catch (error) {
           this.error("Error handling core unpairing", error);
         }
@@ -160,7 +172,7 @@ class RoonApp extends Homey.App {
     }
 
     // Add small delay to allow any pending operations to settle
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, GLOBAL_OP_DELAY_MS));
 
     const zones = Object.values(zoneManager.zones);
     const mutePromises = [];
@@ -219,35 +231,47 @@ class RoonApp extends Homey.App {
     }
 
     // Add small delay to allow any pending operations to settle
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, GLOBAL_OP_DELAY_MS));
 
     const zones = Object.values(zoneManager.zones);
-    let pausedCount = 0;
-    let errorCount = 0;
+    const pausePromises = [];
 
     for (const zone of zones) {
       if (zone.state === "playing") {
-        try {
-          this.transport.control(zone.zone_id, "pause");
-          pausedCount++;
-          this.log(`Paused zone: ${zone.display_name || zone.zone_id}`);
-        } catch (error) {
-          errorCount++;
-          this.error(
-            `Failed to pause zone ${zone.display_name || zone.zone_id}:`,
-            error,
-          );
-        }
+        pausePromises.push(
+          new Promise((resolve) => {
+            this.transport.control(zone.zone_id, "pause", (err) => {
+              if (err) {
+                this.error(
+                  `Failed to pause zone ${zone.display_name || zone.zone_id}: ${err}`,
+                );
+                resolve({ success: false, zone: zone.display_name || zone.zone_id });
+              } else {
+                this.log(`Paused zone: ${zone.display_name || zone.zone_id}`);
+                resolve({ success: true, zone: zone.display_name || zone.zone_id });
+              }
+            });
+          })
+        );
       }
     }
 
-    if (pausedCount === 0 && errorCount === 0) {
+    if (pausePromises.length === 0) {
       this.log("No zones to pause");
       return true;
     }
 
-    this.log(`Paused ${pausedCount} zones, ${errorCount} errors`);
-    return true;
+    try {
+      const results = await Promise.allSettled(pausePromises);
+      const successful = results.filter((r) => r.status === "fulfilled" && r.value.success).length;
+      const failed = results.filter((r) => r.status === "fulfilled" && !r.value.success).length;
+
+      this.log(`Paused ${successful} zones, ${failed} errors`);
+      return true;
+    } catch (error) {
+      this.error("Error in pause all operation:", error);
+      return true; // Don't throw to avoid flow failure
+    }
   }
 
   async sleepAllOutputs() {
@@ -256,7 +280,7 @@ class RoonApp extends Homey.App {
     }
 
     // Add small delay to allow any pending operations to settle
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, GLOBAL_OP_DELAY_MS));
 
     // Get all outputs from all zones
     const zones = Object.values(zoneManager.zones);
@@ -276,14 +300,28 @@ class RoonApp extends Homey.App {
     // Process outputs one by one with a small delay between each
     for (const output of outputs) {
       try {
-        this.transport.standby(output.output_id, {});
-        successCount++;
-        this.log(
-          `Successfully sent standby command to output: ${output.display_name}`,
-        );
+        await new Promise((resolve, reject) => {
+          this.transport.standby(output.output_id, {}, (err) => {
+            if (err) {
+              errorCount++;
+              this.error(
+                `Failed to turn off output ${output.display_name}: ${err}`,
+              );
+              resolve(); // Continue with other outputs even if one fails
+            } else {
+              successCount++;
+              this.log(
+                `Successfully sent standby command to output: ${output.display_name}`,
+              );
+              resolve();
+            }
+          });
+        });
 
         // Small delay between outputs to avoid overwhelming the system
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise((resolve) =>
+          setTimeout(resolve, OUTPUT_SLEEP_DELAY_MS),
+        );
       } catch (error) {
         errorCount++;
         this.error(`Failed to turn off output ${output.display_name}:`, error);
@@ -340,7 +378,7 @@ class RoonApp extends Homey.App {
           resolve();
           //reject(new Error("Play queue operation timeout"));
         }
-      }, 10000);
+      }, QUEUE_TIMEOUT_MS);
 
       const cleanup = () => {
         clearTimeout(overallTimeout);
@@ -377,7 +415,11 @@ class RoonApp extends Homey.App {
               } else {
                 // Empty queue - fall back to simple play
                 this.log("Queue is empty, using fallback play command");
-                this.transport.control(targetId, "play");
+                this.transport.control(targetId, "play", (err) => {
+                  if (err) {
+                    this.error(`Failed to execute play command: ${err}`);
+                  }
+                });
                 resolve(true);
               }
             } else {

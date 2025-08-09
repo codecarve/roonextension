@@ -88,7 +88,7 @@ class RoonOutputDevice extends Homey.Device {
     zoneManager.off("zonesChanged", this._boundOnZonesChanged);
     zoneManager.off("zonesSeekChanged", this._boundOnZonesSeekChanged);
 
-    this.log("RoonZone has been deleted");
+    this.log("RoonOutputDevice has been deleted");
   }
 
   updateZones = async (zones) => {
@@ -279,8 +279,15 @@ class RoonOutputDevice extends Homey.Device {
         return;
       }
 
-      transport.control(this.getData().id, action);
-      this.log(`Setting speaker playing to ${action}`);
+      transport.control(this.getData().id, action, (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerPlaying - Control command '${action}' failed: ${err}`,
+          );
+        } else {
+          this.log(`Setting speaker playing to ${action}`);
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerPlaying - Setting speaker playing to ${action} failed! Error: ${err.message}`,
@@ -303,9 +310,19 @@ class RoonOutputDevice extends Homey.Device {
         return;
       }
 
-      transport.change_settings(this.zone.zone_id, {
-        shuffle: value,
-      });
+      transport.change_settings(
+        this.zone.zone_id,
+        {
+          shuffle: value,
+        },
+        (err) => {
+          if (err) {
+            this.error(
+              `onCapabilitySpeakerShuffle - Failed to set shuffle to ${value}: ${err}`,
+            );
+          }
+        },
+      );
     } catch (err) {
       this.error(
         `onCapabilitySpeakerShuffle - Setting shuffle to ${value} failed! Error: ${err.message}`,
@@ -336,7 +353,13 @@ class RoonOutputDevice extends Homey.Device {
         return;
       }
 
-      transport.change_settings(this.zone.zone_id, { loop });
+      transport.change_settings(this.zone.zone_id, { loop }, (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerRepeat - Failed to set loop to ${loop}: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerRepeat - Setting loop to ${value} failed! Error:  ${err.message}`,
@@ -353,7 +376,13 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilitySpeakerNext - Transport is not available");
         return;
       }
-      transport.control(this.getData().id, "next");
+      transport.control(this.getData().id, "next", (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerNext - Control command 'next' failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerNext - Setting speaker playing to next failed! Error: ${err.message}`,
@@ -370,7 +399,13 @@ class RoonOutputDevice extends Homey.Device {
         this.error("Transport is not available");
         return;
       }
-      transport.control(this.getData().id, "previous");
+      transport.control(this.getData().id, "previous", (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerPrevious - Control command 'previous' failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerPrevious- Setting speaker playing to previous failed! Error: ${err.message}`,
@@ -384,13 +419,19 @@ class RoonOutputDevice extends Homey.Device {
     try {
       const transport = zoneManager.getTransport();
       if (!transport) {
-        this.error("onCapabilitySpeakerPrevious - Transport is not available");
+        this.error("onCapabilitySpeakerPosition - Transport is not available");
         return;
       }
-      transport.seek(this.getData().id, "absolute", value);
+      transport.seek(this.getData().id, "absolute", value, (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerPosition - Seek to position ${value} failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
-        `onCapabilitySpeakerPrevious - Setting speaker position ${value} failed! Error: ${err.message}`,
+        `onCapabilitySpeakerPosition - Setting speaker position ${value} failed! Error: ${err.message}`,
       );
     }
   };
@@ -401,13 +442,22 @@ class RoonOutputDevice extends Homey.Device {
       this.error("changeVolume - Transport is not available");
       return;
     }
+    if (!this.zone) {
+      this.error("changeVolume - Zone is not available");
+      return;
+    }
+    if (!Array.isArray(this.zone.outputs)) {
+      this.error("changeVolume - Zone outputs are not available or invalid.");
+      return;
+    }
     const volumeChangePromises = this.zone.outputs
       .filter((output) => output.output_id === this.getData().id) // Only this output!
-      .filter((output) =>
-        direction > 0
+      .filter((output) => {
+        if (!output.volume) return false;
+        return direction > 0
           ? +output.volume.value < +output.volume.soft_limit
-          : +output.volume.value > 0,
-      )
+          : +output.volume.value > 0;
+      })
       .map((output) => {
         return new Promise((resolve, reject) => {
           transport.change_volume(
@@ -469,14 +519,32 @@ class RoonOutputDevice extends Homey.Device {
 
     const volumeMutePromises = this.zone.outputs
       .filter((output) => output.output_id === this.getData().id) // only this output!
-      .map((output) =>
-        transport.mute(output.output_id, value ? "mute" : "unmute"),
+      .map(
+        (output) =>
+          new Promise((resolve, reject) => {
+            transport.mute(
+              output.output_id,
+              value ? "mute" : "unmute",
+              (err) => {
+                if (err) {
+                  this.error(
+                    `onCapabilityVolumeMute - Failed to ${value ? "mute" : "unmute"} output ${output.output_id}: ${err}`,
+                  );
+                  reject(err);
+                } else {
+                  resolve();
+                }
+              },
+            );
+          }),
       );
 
     try {
       await Promise.all(volumeMutePromises);
     } catch (error) {
-      this.error(error);
+      this.error(
+        `onCapabilityVolumeMute - Error during mute operation: ${error}`,
+      );
     }
   };
 
@@ -490,6 +558,12 @@ class RoonOutputDevice extends Homey.Device {
     }
 
     if (!this.zone) {
+      this.error("onCapabilityVolumeSet - Zone is not available");
+      return;
+    }
+
+    if (!Array.isArray(this.zone.outputs)) {
+      this.error("onCapabilityVolumeSet - Zone outputs are not available");
       return;
     }
 
@@ -503,6 +577,11 @@ class RoonOutputDevice extends Homey.Device {
     );
     if (!output) {
       this.error("onCapabilityVolumeSet - Output not found");
+      return;
+    }
+
+    if (!output.volume) {
+      this.error("onCapabilityVolumeSet - Output volume control not available");
       return;
     }
 
@@ -558,7 +637,13 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilitySpeakerWakeUp - Transport is not available");
         return;
       }
-      transport.convenience_switch(this.getData().id, {});
+      transport.convenience_switch(this.getData().id, {}, (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerWakeUp - Wake up command failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerWakeUp - Triggering wake up failed! Error: ${err.message}`,
@@ -575,7 +660,13 @@ class RoonOutputDevice extends Homey.Device {
         this.error("onCapabilitySpeakerSleep - Transport is not available");
         return;
       }
-      transport.standby(this.getData().id, {});
+      transport.standby(this.getData().id, {}, (err) => {
+        if (err) {
+          this.error(
+            `onCapabilitySpeakerSleep - Standby command failed: ${err}`,
+          );
+        }
+      });
     } catch (err) {
       this.error(
         `onCapabilitySpeakerSleep - Triggering stand by failed! Error: ${err.message}`,
@@ -598,9 +689,19 @@ class RoonOutputDevice extends Homey.Device {
         return;
       }
 
-      transport.change_settings(this.zone.zone_id, {
-        auto_radio: value,
-      });
+      transport.change_settings(
+        this.zone.zone_id,
+        {
+          auto_radio: value,
+        },
+        (err) => {
+          if (err) {
+            this.error(
+              `onCapabilityAutoRadio - Failed to set auto_radio to ${value}: ${err}`,
+            );
+          }
+        },
+      );
     } catch (err) {
       this.error(
         `onCapabilityAutoRadio - Setting auto_radio to ${value} failed! Error: ${err.message}`,
@@ -636,7 +737,7 @@ class RoonOutputDevice extends Homey.Device {
       // Filter only if query is not empty
       if (query.length > 0) {
         items.items = items.items.filter((item) =>
-          item.title.toLowerCase().includes(query.toLowerCase())
+          item.title.toLowerCase().includes(query.toLowerCase()),
         );
       }
 
@@ -655,9 +756,11 @@ class RoonOutputDevice extends Homey.Device {
   // Helper method for action validation and setup
   async _validateAndGetBrowse(args, argName) {
     const item = args[argName];
-    
+
     if (!item || !item.name || item.name.trim().length === 0) {
-      throw new Error(`${argName.charAt(0).toUpperCase() + argName.slice(1)} is not defined`);
+      throw new Error(
+        `${argName.charAt(0).toUpperCase() + argName.slice(1)} is not defined`,
+      );
     }
 
     const app = this.homey.app;
@@ -669,7 +772,12 @@ class RoonOutputDevice extends Homey.Device {
   }
 
   async onRegisterArgumentAutocompleteListenerArtistRadio(query, args) {
-    return this._genericBrowseAutocomplete(query, "artists", "artists", "artist radio");
+    return this._genericBrowseAutocomplete(
+      query,
+      "artists",
+      "artists",
+      "artist radio",
+    );
   }
 
   async onRunListenerArtistRadioOutputActionCard(args, state) {
@@ -749,7 +857,12 @@ class RoonOutputDevice extends Homey.Device {
   }
 
   async onRegisterArgumentAutocompleteListenerInternetRadio(query, args) {
-    return this._genericBrowseAutocomplete(query, "internet_radio", "internet radios", "internet radio");
+    return this._genericBrowseAutocomplete(
+      query,
+      "internet_radio",
+      "internet radios",
+      "internet radio",
+    );
   }
 
   async onRunListenerInternetRadioOutputActionCard(args, state) {
@@ -765,16 +878,18 @@ class RoonOutputDevice extends Homey.Device {
       // Re-search is required - Roon API item keys are dynamic and change between calls
       const internetRadiosResult = await browseAndLoadAllHierarchy(
         browse,
-        "internet_radio"
+        "internet_radio",
       );
 
       const filteredRadios = internetRadiosResult.items.filter((a) =>
-        a.title.toLowerCase().includes(internet_radio.name.toLowerCase())
+        a.title.toLowerCase().includes(internet_radio.name.toLowerCase()),
       );
       this.log(`Found ${filteredRadios.length} internet radios`);
-      
+
       if (filteredRadios.length === 0) {
-        throw new Error(`Internet radio station "${internet_radio.name}" was not found`);
+        throw new Error(
+          `Internet radio station "${internet_radio.name}" was not found`,
+        );
       }
 
       const internetRadioItem = filteredRadios[0];
@@ -790,7 +905,7 @@ class RoonOutputDevice extends Homey.Device {
         browse,
         "internet_radio",
         this.getData().id,
-        internetRadioItem.item_key
+        internetRadioItem.item_key,
       );
 
       this.log("===== INTERNET RADIO ACTION END =====");
@@ -802,7 +917,12 @@ class RoonOutputDevice extends Homey.Device {
   }
 
   async onRegisterArgumentAutocompleteListenerPlaylist(query, args) {
-    return this._genericBrowseAutocomplete(query, "playlists", "playlists", "playlist");
+    return this._genericBrowseAutocomplete(
+      query,
+      "playlists",
+      "playlists",
+      "playlist",
+    );
   }
 
   async onRunListenerPlaylistOutputActionCard(args, state) {
@@ -816,13 +936,16 @@ class RoonOutputDevice extends Homey.Device {
       const browse = await this._validateAndGetBrowse(args, "playlist");
 
       // Re-search is required - Roon API item keys are dynamic and change between calls
-      const playlistsResult = await browseAndLoadAllHierarchy(browse, "playlists");
-      
+      const playlistsResult = await browseAndLoadAllHierarchy(
+        browse,
+        "playlists",
+      );
+
       const filteredPlaylists = playlistsResult.items.filter((a) =>
         a.title.toLowerCase().includes(playlist.name.toLowerCase()),
       );
       this.log(`Found ${filteredPlaylists.length} playlists`);
-      
+
       if (filteredPlaylists.length === 0) {
         throw new Error(`Playlist "${playlist.name}" was not found`);
       }
@@ -835,15 +958,17 @@ class RoonOutputDevice extends Homey.Device {
         browse,
         "playlists",
         playlistItem.item_key,
-        1
+        1,
       );
       this.log("[PLAYLIST-STEP2] Playlist details:", playlistDetailsResult);
 
       const playPlaylistItem = playlistDetailsResult.items.find(
-        (i) => i.title === "Play Playlist"
+        (i) => i.title === "Play Playlist",
       );
       if (!playPlaylistItem) {
-        throw new Error("'Play Playlist' action was not found in playlist menu");
+        throw new Error(
+          "'Play Playlist' action was not found in playlist menu",
+        );
       }
 
       // Get play mode options
@@ -851,12 +976,12 @@ class RoonOutputDevice extends Homey.Device {
         browse,
         "playlists",
         playPlaylistItem.item_key,
-        2
+        2,
       );
       this.log("[PLAYLIST-STEP3] Play options:", playOptionsResult);
 
       const playNowItem = playOptionsResult.items.find(
-        (i) => i.title === "Play Now"
+        (i) => i.title === "Play Now",
       );
       if (!playNowItem) {
         throw new Error("'Play Now' option was not found in play modes");
@@ -872,9 +997,9 @@ class RoonOutputDevice extends Homey.Device {
         browse,
         "playlists",
         this.getData().id,
-        playNowItem.item_key
+        playNowItem.item_key,
       );
-      
+
       this.log("===== PLAYLIST ACTION END =====");
     } catch (error) {
       this.error((error && error.message) || error);
@@ -899,12 +1024,12 @@ class RoonOutputDevice extends Homey.Device {
 
       // Re-search is required - Roon API item keys are dynamic and change between calls
       const genresResult = await browseAndLoadAllHierarchy(browse, "genres");
-      
+
       const filteredGenres = genresResult.items.filter((a) =>
-        a.title.toLowerCase().includes(genre.name.toLowerCase())
+        a.title.toLowerCase().includes(genre.name.toLowerCase()),
       );
       this.log(`Found ${filteredGenres.length} genres`);
-      
+
       if (filteredGenres.length === 0) {
         throw new Error(`Genre "${genre.name}" was not found`);
       }
@@ -917,12 +1042,12 @@ class RoonOutputDevice extends Homey.Device {
         browse,
         "genres",
         genreItem.item_key,
-        1
+        1,
       );
       this.log("[GENRE-STEP2] Genre details:", genreDetailsResult);
 
       const playGenreItem = genreDetailsResult.items.find(
-        (i) => i.title === "Play Genre"
+        (i) => i.title === "Play Genre",
       );
       if (!playGenreItem) {
         throw new Error("'Play Genre' action was not found in genre menu");
@@ -933,12 +1058,12 @@ class RoonOutputDevice extends Homey.Device {
         browse,
         "genres",
         playGenreItem.item_key,
-        2
+        2,
       );
       this.log("[GENRE-STEP3] Play options:", playOptionsResult);
 
       const shuffleItem = playOptionsResult.items.find(
-        (i) => i.title === "Shuffle"
+        (i) => i.title === "Shuffle",
       );
       if (!shuffleItem) {
         throw new Error("'Shuffle' option was not found in play modes");
@@ -954,9 +1079,9 @@ class RoonOutputDevice extends Homey.Device {
         browse,
         "genres",
         this.getData().id,
-        shuffleItem.item_key
+        shuffleItem.item_key,
       );
-      
+
       this.log("===== GENRE SHUFFLE ACTION END =====");
     } catch (error) {
       this.error((error && error.message) || error);

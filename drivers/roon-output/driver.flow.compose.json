@@ -3,64 +3,86 @@
     {
       "id": "speaker_sleep",
       "title": {
-        "en": "Sleep",
-        "nl": "Zet Uit",
-        "es": "Dormir",
-        "fr": "Mettre en veille",
-        "de": "Ruhemodus"
+        "en": "Turn off output",
+        "nl": "Schakel uitgang uit",
+        "es": "Apagar salida",
+        "fr": "Éteindre la sortie",
+        "de": "Ausgang ausschalten"
       },
       "titleFormatted": {
-        "en": "Set to sleep",
-        "nl": "Zet uit",
-        "es": "Poner en modo dormir",
-        "fr": "Mettre en veille",
-        "de": "In Ruhemodus versetzen"
+        "en": "Turn off the output device (standby)",
+        "nl": "Schakel het uitgangsapparaat uit (stand-by)",
+        "es": "Apagar el dispositivo de salida (espera)",
+        "fr": "Éteindre le périphérique de sortie (veille)",
+        "de": "Ausgangsgerät ausschalten (Standby)"
       }
     },
     {
       "id": "speaker_wake_up",
       "title": {
-        "en": "Wake Up",
-        "nl": "Zet Aan",
-        "es": "Activar",
-        "fr": "Réveiller",
-        "de": "Aktivieren"
+        "en": "Turn on output",
+        "nl": "Schakel uitgang in",
+        "es": "Encender salida",
+        "fr": "Allumer la sortie",
+        "de": "Ausgang einschalten"
       },
       "titleFormatted": {
-        "en": "Wake up",
-        "nl": "Zet aan",
-        "es": "Activar",
-        "fr": "Réveiller",
-        "de": "Aktivieren"
+        "en": "Turn on the output device",
+        "nl": "Schakel het uitgangsapparaat in",
+        "es": "Encender el dispositivo de salida",
+        "fr": "Allumer le périphérique de sortie",
+        "de": "Ausgangsgerät einschalten"
       }
     },
     {
       "id": "speaker_auto_radio_output",
       "title": {
-        "en": "Roon Radio",
-        "nl": "Roon Radio",
-        "es": "Radio Roon",
-        "fr": "Radio Roon",
-        "de": "Roon Radio"
+        "en": "Turn Roon Radio on or off",
+        "nl": "Zet Roon Radio aan of uit",
+        "es": "Activar o desactivar Radio Roon",
+        "fr": "Activer ou désactiver Radio Roon",
+        "de": "Roon Radio ein- oder ausschalten"
       },
       "titleFormatted": {
-        "en": "Roon Radio [[enabled]]",
-        "nl": "Roon Radio [[enabled]]",
-        "es": "Radio Roon [[enabled]]",
-        "fr": "Radio Roon [[enabled]]",
-        "de": "Roon Radio [[enabled]]"
+        "en": "Turn Roon Radio [[onoff]]",
+        "nl": "Zet Roon Radio [[onoff]]",
+        "es": "Activar Radio Roon [[onoff]]",
+        "fr": "Activer Radio Roon [[onoff]]",
+        "de": "Roon Radio [[onoff]]"
       },
       "args": [
         {
-          "name": "enabled",
-          "type": "checkbox",
+          "name": "onoff",
+          "type": "dropdown",
           "title": {
-            "en": "Enabled",
-            "nl": "Actief",
-            "es": "Activado",
-            "fr": "Activé",
-            "de": "Aktiviert"
-          }
+            "en": "On/Off",
+            "nl": "Aan/Uit",
+            "es": "Encendido/Apagado",
+            "fr": "On/Off",
+            "de": "Ein/Aus"
+          },
+          "values": [
+            {
+              "id": "on",
+              "title": {
+                "en": "On",
+                "nl": "Aan",
+                "es": "Encendido",
+                "fr": "On",
+                "de": "Ein"
+              }
+            },
+            {
+              "id": "off",
+              "title": {
+                "en": "Off",
+                "nl": "Uit",
+                "es": "Apagado",
+                "fr": "Off",
+                "de": "Aus"
+              }
+            }
+          ]
         }
       ]
     },

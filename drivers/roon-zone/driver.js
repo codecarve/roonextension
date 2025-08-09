@@ -16,7 +16,22 @@ class RoonZoneDriver extends Homey.Driver {
       "speaker_auto_radio_zone",
     );
     autoRadioAction.registerRunListener(async (args, state) => {
-      return args.device.onCapabilityAutoRadio(args.enabled, null);
+      // Backward compatibility: support both old 'enabled' and new 'onoff' parameters
+      let enabled;
+      if (args.onoff !== undefined) {
+        // New format with dropdown
+        enabled = args.onoff === "on";
+      } else if (args.enabled !== undefined) {
+        // Old format with checkbox (backward compatibility)
+        enabled = args.enabled;
+        this.log(
+          "Warning: Using deprecated 'enabled' parameter in Roon Radio flow action. Please recreate this flow.",
+        );
+      } else {
+        // Default to false if neither parameter exists
+        enabled = false;
+      }
+      return args.device.onCapabilityAutoRadio(enabled, null);
     });
   }
 
