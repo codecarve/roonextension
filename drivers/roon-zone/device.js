@@ -86,6 +86,12 @@ class RoonZoneDevice extends Homey.Device {
   }
 
   updateZones = async (zones) => {
+    // Check if device is still available
+    if (!this.getAvailable()) {
+      this.log("Device not available, skipping updateZones");
+      return;
+    }
+
     let found = false;
 
     for (let zone of zones) {
@@ -128,7 +134,10 @@ class RoonZoneDevice extends Homey.Device {
             const repeatValue = loopMap[zone.settings.loop];
 
             if (repeatValue) {
-              await this.setCapabilityValue("speaker_repeat", repeatValue);
+              await this.setCapabilityValue(
+                "speaker_repeat",
+                repeatValue,
+              ).catch(this.error);
             }
           } catch (error) {
             this.error("Error setting repeat value", error);
@@ -185,7 +194,9 @@ class RoonZoneDevice extends Homey.Device {
             if (output.volume) {
               try {
                 let is_muted = output.volume.is_muted;
-                await this.setCapabilityValue("volume_mute", is_muted);
+                await this.setCapabilityValue("volume_mute", is_muted).catch(
+                  this.error,
+                );
               } catch (err) {
                 this.error(
                   `Error setting volume_mute for output ${output.output_id}! Error: ${err.message}`,
@@ -203,6 +214,7 @@ class RoonZoneDevice extends Homey.Device {
           if (imageDriver && zone?.now_playing) {
             const newImageKey = zone.now_playing.image_key;
             if (newImageKey !== this.currentImageKey) {
+              const oldImageKey = this.currentImageKey;
               await imageUtil.fetchAndSaveImage(
                 imageDriver,
                 newImageKey,
@@ -210,10 +222,13 @@ class RoonZoneDevice extends Homey.Device {
               );
               await this.albumArtImage.update();
               this.currentImageKey = newImageKey;
+              this.log(`Album art updated: ${oldImageKey || 'none'} -> ${newImageKey}`);
             }
           }
         } catch (err) {
-          this.error(`Error setting image. Error: ${err.message}`);
+          const oldImageKey = this.currentImageKey;
+          const newImageKey = zone?.now_playing?.image_key;
+          this.error(`Error setting image. Failed to update from '${oldImageKey || 'none'}' to '${newImageKey || 'unknown'}'. Error: ${err.message}`);
         }
 
         break;
@@ -224,15 +239,34 @@ class RoonZoneDevice extends Homey.Device {
   onZonesUpdated = async (zones) => {
     this.log("onZonesUpdated");
 
+    // Check if device is still available
+    if (!this.getAvailable()) {
+      this.log("Device not available, skipping onZonesUpdated");
+      return;
+    }
+
     await this.updateZones(zones, true);
   };
 
   onZonesChanged = async (zones) => {
     this.log("onZonesChanged");
+
+    // Check if device is still available
+    if (!this.getAvailable()) {
+      this.log("Device not available, skipping onZonesChanged");
+      return;
+    }
+
     await this.updateZones(zones, false);
   };
 
   onZonesSeekChanged = async (zones_seek_changed) => {
+    // Check if device is still available
+    if (!this.getAvailable()) {
+      this.log("Device not available, skipping onZonesSeekChanged");
+      return;
+    }
+
     if (!zones_seek_changed || !Array.isArray(zones_seek_changed)) {
       return;
     }
@@ -242,12 +276,13 @@ class RoonZoneDevice extends Homey.Device {
       }
       if (zone.zone_id === this.getData().id) {
         if (zone.seek_position !== undefined) {
-          this.setCapabilityValue("speaker_position", zone.seek_position).catch(
-            this.error,
-          );
+          await this.setCapabilityValue(
+            "speaker_position",
+            zone.seek_position,
+          ).catch(this.error);
         }
         if (zone.queue_time_remaining !== undefined) {
-          this.setCapabilityValue(
+          await this.setCapabilityValue(
             "speaker_queue_time_remaining",
             zone.queue_time_remaining,
           ).catch(this.error);

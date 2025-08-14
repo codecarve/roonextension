@@ -61,5 +61,12 @@
     "es": "🎯 **Novedades**\n• Nombres de acción más claros para automatización más fácil\n• Estabilidad y confiabilidad mejoradas\n• Todos tus flujos existentes siguen funcionando\n\n**¡Gracias por usar Roon con Homey!**",
     "fr": "🎯 **Nouveautés**\n• Noms d'action plus clairs pour une automatisation facilitée\n• Stabilité et fiabilité améliorées\n• Tous vos flux existants continuent de fonctionner\n\n**Merci d'utiliser Roon avec Homey!**",
     "de": "🎯 **Neuigkeiten**\n• Klarere Flow-Aktionsnamen für einfachere Automatisierung\n• Verbesserte Stabilität und Zuverlässigkeit\n• Alle Ihre bestehenden Flows funktionieren weiter\n\n**Danke, dass Sie Roon mit Homey nutzen!**"
+  },
+  "1.1.14": {
+    "en": "🔧 **Maintenance Release**",
+    "nl": "🔧 **Onderhoudsversie**",
+    "es": "🔧 **Versión de Mantenimiento**",
+    "fr": "🔧 **Version de Maintenance**",
+    "de": "🔧 **Wartungsversion**"
   }
 }

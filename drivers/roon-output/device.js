@@ -92,6 +92,12 @@ class RoonOutputDevice extends Homey.Device {
   }
 
   updateZones = async (zones) => {
+    // Check if device is still available
+    if (!this.getAvailable()) {
+      this.log("Device not available, skipping updateZones");
+      return;
+    }
+
     let found = false;
     for (let zone of zones) {
       for (let output of zone.outputs) {
@@ -133,7 +139,10 @@ class RoonOutputDevice extends Homey.Device {
               const repeatValue = loopMap[zone.settings.loop];
 
               if (repeatValue) {
-                await this.setCapabilityValue("speaker_repeat", repeatValue);
+                await this.setCapabilityValue(
+                  "speaker_repeat",
+                  repeatValue,
+                ).catch(this.error);
               }
             } catch (error) {
               this.error("Error setting repeat value", error);
@@ -193,11 +202,11 @@ class RoonOutputDevice extends Homey.Device {
             await this.setCapabilityValue(
               "volume_set",
               +output.volume.value / 100,
-            );
+            ).catch(this.error);
             await this.setCapabilityValue(
               "volume_soft_limit",
               +output.volume.soft_limit,
-            );
+            ).catch(this.error);
           }
 
           try {
@@ -206,6 +215,7 @@ class RoonOutputDevice extends Homey.Device {
             if (imageDriver && zone && zone.now_playing) {
               const newImageKey = zone.now_playing.image_key;
               if (newImageKey !== this.currentImageKey) {
+                const oldImageKey = this.currentImageKey;
                 await imageUtil.fetchAndSaveImage(
                   imageDriver,
                   newImageKey,
@@ -213,10 +223,13 @@ class RoonOutputDevice extends Homey.Device {
                 );
                 await this.albumArtImage.update();
                 this.currentImageKey = newImageKey;
+                this.log(`Album art updated: ${oldImageKey || 'none'} -> ${newImageKey}`);
               }
             }
           } catch (err) {
-            this.error(`Error setting image. Error: ${err.message}`);
+            const oldImageKey = this.currentImageKey;
+            const newImageKey = zone?.now_playing?.image_key;
+            this.error(`Error setting image. Failed to update from '${oldImageKey || 'none'}' to '${newImageKey || 'unknown'}'. Error: ${err.message}`);
           }
 
           break;
@@ -227,11 +240,25 @@ class RoonOutputDevice extends Homey.Device {
 
   onZonesUpdated = async (zones) => {
     this.log("onZonesUpdated");
+
+    // Check if device is still available
+    if (!this.getAvailable()) {
+      this.log("Device not available, skipping onZonesUpdated");
+      return;
+    }
+
     await this.updateZones(zones);
   };
 
   onZonesChanged = async (zones) => {
     this.log("onZonesChanged");
+
+    // Check if device is still available
+    if (!this.getAvailable()) {
+      this.log("Device not available, skipping onZonesChanged");
+      return;
+    }
+
     await this.updateZones(zones);
 
     // Track grouping status for this output
@@ -274,6 +301,12 @@ class RoonOutputDevice extends Homey.Device {
   };
 
   onZonesSeekChanged = async (zones_seek_changed) => {
+    // Check if device is still available
+    if (!this.getAvailable()) {
+      this.log("Device not available, skipping onZonesSeekChanged");
+      return;
+    }
+
     if (
       !this.zone ||
       !zones_seek_changed ||
@@ -649,7 +682,8 @@ class RoonOutputDevice extends Homey.Device {
           },
         );
       });
-      await this.setCapabilityValue("volume_set", volumeToSet / 100);
+      // Don't set capability value here - Roon will report back the actual value
+      // and it will be set in updateZones()
     } catch (err) {
       this.error(
         `onCapabilityVolumeSet - Setting volume failed! Error: ${err.message}`,
@@ -663,7 +697,42 @@ class RoonOutputDevice extends Homey.Device {
     this.log(`Setting volume soft limit to: ${softLimitToSet}`);
 
     try {
-      await this.setCapabilityValue("volume_soft_limit", softLimitToSet);
+      const transport = this.zoneManager.getTransport();
+      if (!transport) {
+        this.error("onCapabilityVolumeSoftLimit - Transport is not available");
+        return;
+      }
+
+      if (!this.zone) {
+        this.error("onCapabilityVolumeSoftLimit - Zone is not available");
+        return;
+      }
+
+      // Find this output in the zone
+      const output = this.zone.outputs?.find(
+        (o) => o.output_id === this.getData().id,
+      );
+
+      if (!output) {
+        this.error("onCapabilityVolumeSoftLimit - Output not found in zone");
+        return;
+      }
+
+      // Use Roon transport to set the soft limit
+      transport.change_volume(
+        output.output_id,
+        "set_soft_limit",
+        softLimitToSet,
+        (err) => {
+          if (err) {
+            this.error(
+              `onCapabilityVolumeSoftLimit - Failed to set soft limit: ${err}`,
+            );
+          } else {
+            this.log(`Successfully set soft limit to ${softLimitToSet}`);
+          }
+        },
+      );
     } catch (err) {
       this.error(
         `onCapabilityVolumeSoftLimit - Setting soft limit failed! Error: ${err.message}`,

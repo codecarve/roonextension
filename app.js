@@ -38,13 +38,13 @@ class RoonApp extends Homey.App {
     this.roonApi = new RoonApi({
       extension_id: "nl.codecarve.roonextension",
       display_name: "Homey",
-      display_version: "1.1.13",
+      display_version: "1.1.14",
       publisher: "CodeCarve",
       email: "hello@codecarve.nl",
       website: "https://github.com/codecarve/roonextension/issues",
       log_level: "none",
       force_server: true,
-      core_paired: (core) => {
+      core_paired: async (core) => {
         this.log("Roon core is pairing...");
 
         try {
@@ -65,18 +65,17 @@ class RoonApp extends Homey.App {
           this.error("Error handling core pairing", error);
         }
 
-        corePairedTrigger
+        await corePairedTrigger
           .trigger({
             name: core.display_name,
             ip: core.registration.extension_host,
             port: core.registration.http_port,
           })
-          .then()
           .catch(this.error);
 
         this.log("Roon core is paired");
       },
-      core_unpaired: (core) => {
+      core_unpaired: async (core) => {
         this.log("Roon Core is unpairing...");
 
         try {
@@ -101,13 +100,12 @@ class RoonApp extends Homey.App {
           this.error("Error handling core unpairing", error);
         }
 
-        coreUnpairedTrigger
+        await coreUnpairedTrigger
           .trigger({
             name: core.display_name,
             ip: core.registration.extension_host,
             port: core.registration.http_port,
           })
-          .then()
           .catch(this.error);
         this.log("Roon core is unpaired");
       },
@@ -598,7 +596,7 @@ class RoonApp extends Homey.App {
           },
         );
 
-        this.log("Queue subscription initiated, waiting for callback...");
+        this.log("Queue subscription initiated, waiting for callback....");
       } catch (error) {
         cleanup();
         if (!isResolved) {
